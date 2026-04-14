@@ -100,7 +100,7 @@ export default function WhyUsSection() {
           {/* Floating glass card */}
           <div
             ref={statsRef}
-            className="absolute -bottom-8 -right-4 md:-right-10 glass-card p-6 rounded-3xl z-20 shadow-card-lg max-w-[200px] opacity-100">
+            className="absolute -bottom-8 -right-4 md:-right-10 glass-card p-6 rounded-3xl z-20 shadow-card-lg max-w-[200px] opacity-100 rounded-br-[100px] rounded-t-[100px] rounded-bl-[100px]">
             
             <p className="font-serif italic text-3xl mb-1" style={{ color: '#E8A020' }}>4.9★</p>
             <p className="text-xs font-bold text-navy leading-snug">Average client satisfaction across 500+ corporate accounts</p>
