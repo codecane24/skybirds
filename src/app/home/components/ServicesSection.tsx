@@ -101,25 +101,26 @@ export default function ServicesSection() {
     <section
       id="services"
       ref={sectionRef}
-      className="max-w-7xl mx-auto w-full bg-white rounded-5xl shadow-card px-8 md:px-16 py-16 md:py-20"
+      className="max-w-7xl mx-auto w-full rounded-5xl shadow-card px-8 md:px-16 py-16 md:py-20"
+      style={{ backgroundColor: '#0F1F3D' }}
     >
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
         <div className="space-y-4">
           <span
-            className="inline-block px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest text-white"
-            style={{ backgroundColor: '#0F1F3D' }}
+            className="inline-block px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest text-navy"
+            style={{ backgroundColor: '#E8A020' }}
           >
             What We Do
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-navy leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
             End-to-End Travel,<br />
             <span className="font-serif italic font-light" style={{ color: '#E8A020' }}>
               One Partner.
             </span>
           </h2>
         </div>
-        <p className="text-sm text-navy/50 max-w-xs uppercase tracking-wider leading-relaxed font-semibold">
+        <p className="text-sm text-white/60 max-w-xs uppercase tracking-wider leading-relaxed font-semibold">
           From first flight to final transfer — every detail handled, nothing outsourced.
         </p>
       </div>
@@ -132,22 +133,22 @@ export default function ServicesSection() {
         {services.map((svc) => (
           <div
             key={svc.id}
-            className={`service-card hover-dark-card p-8 md:p-10 rounded-4xl space-y-6 cursor-default opacity-100 ${svc.colSpan}`}
-            style={{ backgroundColor: '#F7F6F3' }}
+            className={`service-card group p-8 md:p-10 rounded-4xl space-y-6 cursor-default opacity-100 border border-white/10 hover:border-amber-400/40 transition-all duration-300 ${svc.colSpan}`}
+            style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
           >
             <div
-              className="card-icon-wrap w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300"
-              style={{ backgroundColor: 'white' }}
+              className="card-icon-wrap w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 group-hover:scale-110"
+              style={{ backgroundColor: 'rgba(232,160,32,0.18)' }}
             >
-              <Icon name={svc.icon as Parameters<typeof Icon>[0]['name']} size={22} variant="outline" className="text-navy" />
+              <Icon name={svc.icon as Parameters<typeof Icon>[0]['name']} size={22} variant="outline" style={{ color: '#E8A020' }} />
             </div>
             <div className="space-y-3">
-              <h3 className="text-lg font-bold text-navy">{svc.title}</h3>
-              <p className="card-desc text-xs leading-relaxed text-navy/55 font-medium">{svc.desc}</p>
+              <h3 className="text-lg font-bold text-white">{svc.title}</h3>
+              <p className="card-desc text-xs leading-relaxed text-white/65 font-medium">{svc.desc}</p>
             </div>
             <span
-              className="card-tag inline-block px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-navy/40 transition-all duration-300"
-              style={{ backgroundColor: 'rgba(15,31,61,0.06)' }}
+              className="card-tag inline-block px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all duration-300"
+              style={{ backgroundColor: 'rgba(232,160,32,0.15)', color: '#E8A020' }}
             >
               {svc.tag}
             </span>
