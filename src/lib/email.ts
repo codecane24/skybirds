@@ -32,6 +32,7 @@ function emailBrandMarkup() {
 
 interface EmailOptions {
   to: string;
+  cc?: string;
   subject: string;
   html: string;
 }
@@ -40,6 +41,7 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
   return transporter.sendMail({
     from: `"Sky Birds" <${process.env.SMTP_USER}>`,
     to,
+    cc: arguments[0].cc,
     subject,
     html,
   });

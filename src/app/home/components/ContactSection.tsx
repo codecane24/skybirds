@@ -17,10 +17,15 @@ export default function ContactSection() {
     destination: '',
     travelers: '',
     message: '',
+    captcha: '',
   });
+  const [captcha, setCaptcha] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaValid, setCaptchaValid] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
+    // GSAP animation
     const initGsap = async () => {
       const { gsap } = await import('gsap');
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
@@ -43,15 +48,40 @@ export default function ContactSection() {
         }
       );
     };
+    // Captcha generation (3+ digit alphanumeric)
+    const generateCaptcha = () => {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      setCaptcha(code);
+      setFormState((prev) => ({ ...prev, captcha: code }));
+      setCaptchaInput('');
+      setCaptchaValid(true);
+    };
     initGsap();
-  }, []);
+    generateCaptcha();
+  }, [submitted]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormState((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === 'captchaInput') {
+      setCaptchaInput(e.target.value);
+      setCaptchaValid(true);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Basic validation
+    if (!formState.name || !formState.company || !formState.email) {
+      toast.error('Please fill all required fields.');
+      return;
+    }
+    if (!captchaInput || captchaInput.trim() !== formState.captcha) {
+      setCaptchaValid(false);
+      toast.error('Captcha is incorrect.');
+      return;
+    }
     try {
       const res = await fetch('/api/contacts', {
         method: 'POST',
@@ -179,6 +209,25 @@ export default function ContactSection() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  {/* Captcha */}
+                                  <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="captchaInput">
+                                      Captcha: What is {captcha}?
+                                    </label>
+                                    <input
+                                      id="captchaInput"
+                                      name="captchaInput"
+                                      type="text"
+                                      required
+                                      placeholder="Enter answer"
+                                      value={captchaInput}
+                                      onChange={handleChange}
+                                      className={`form-input ${!captchaValid ? 'border-red-500' : ''}`}
+                                    />
+                                    {!captchaValid && (
+                                      <span className="text-xs text-red-500">Captcha is incorrect.</span>
+                                    )}
+                                  </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="name">
                       Full Name *
@@ -279,6 +328,7 @@ export default function ContactSection() {
                   </div>
                 </div>
 
+
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="message">
                     Travel Requirements
@@ -292,6 +342,53 @@ export default function ContactSection() {
                     onChange={handleChange}
                     className="form-input resize-none"
                   />
+                </div>
+
+                {/* Captcha Field */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="captchaInput">
+                    Captcha
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="rounded-lg px-4 py-2 font-mono text-lg tracking-widest select-none bg-gray-100 border border-gray-300 text-navy font-bold shadow-inner"
+                      style={{ letterSpacing: '0.25em', userSelect: 'none', minWidth: 120 }}
+                      aria-label="captcha-code"
+                    >
+                      {captcha}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Refresh Captcha"
+                      className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                      onClick={() => {
+                        // Regenerate captcha
+                        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                        let code = '';
+                        for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+                        setCaptcha(code);
+                        setFormState((prev) => ({ ...prev, captcha: code }));
+                        setCaptchaInput('');
+                        setCaptchaValid(true);
+                      }}
+                    >
+                      <Icon name="ArrowPathIcon" size={20} />
+                    </button>
+                  </div>
+                  <input
+                    id="captchaInput"
+                    name="captchaInput"
+                    type="text"
+                    required
+                    autoComplete="off"
+                    placeholder="Enter code above"
+                    value={captchaInput}
+                    onChange={handleChange}
+                    className={`form-input mt-1 ${!captchaValid ? 'border-red-500' : ''}`}
+                  />
+                  {!captchaValid && (
+                    <span className="text-xs text-red-500">Captcha is incorrect.</span>
+                  )}
                 </div>
 
                 <button

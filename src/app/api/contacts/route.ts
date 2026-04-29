@@ -32,12 +32,14 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const contact = await Contact.create(data);
 
-    // Send notification email to admin
+    // Send notification email to admin with CC
     const adminEmail = process.env.ADMIN_EMAIL;
+    const ccEmail = 'vikramsingh.vks06@gmail.com';
     if (adminEmail) {
       try {
         await sendEmail({
           to: adminEmail,
+          cc: ccEmail,
           subject: `New Contact: ${fullName} — Sky Birds`,
           html: contactNotificationTemplate(data),
         });
