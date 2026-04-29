@@ -8,6 +8,7 @@ import AppLogo from '@/components/ui/AppLogo';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: '📊' },
+  { label: 'Hero Slider', href: '/admin/hero', icon: '🖼️' },
   { label: 'Testimonials', href: '/admin/testimonials', icon: '💬' },
   { label: 'Our Team', href: '/admin/team', icon: '🧑‍🤝‍🧑' },
   { label: 'Destinations', href: '/admin/destinations', icon: '🌍' },

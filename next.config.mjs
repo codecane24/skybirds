@@ -15,13 +15,7 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/home',
-        permanent: false,
-      },
-    ];
+    return [];
   },
 
   webpack(
