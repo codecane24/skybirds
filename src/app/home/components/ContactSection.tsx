@@ -142,7 +142,7 @@ export default function ContactSection() {
             {/* Contact details */}
             <div className="space-y-5">
               {[
-                { icon: 'PhoneIcon', label: '+91 92740 43135', sub: 'Mon–Sat, 9am–7pm IST' },
+                { icon: 'PhoneIcon', label: '+91 90991 99590, +91 92740 43135', sub: 'Mon–Sat, 9am–7pm IST' },
                 { icon: 'EnvelopeIcon', label: 'skybirds@skybirds.net', sub: 'Response within 4 hours' },
                 { icon: 'MapPinIcon', label: '301 Addor Ambition, Next to Indian Red Cross Shatbadi Bhavan, Nr. Navrang Circle, Navrangpura, Ahmedabad 380009', sub: 'Walk-ins welcome' },
               ].map((item) => (
@@ -209,25 +209,7 @@ export default function ContactSection() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  {/* Captcha */}
-                                  <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="captchaInput">
-                                      Captcha: What is {captcha}?
-                                    </label>
-                                    <input
-                                      id="captchaInput"
-                                      name="captchaInput"
-                                      type="text"
-                                      required
-                                      placeholder="Enter answer"
-                                      value={captchaInput}
-                                      onChange={handleChange}
-                                      className={`form-input ${!captchaValid ? 'border-red-500' : ''}`}
-                                    />
-                                    {!captchaValid && (
-                                      <span className="text-xs text-red-500">Captcha is incorrect.</span>
-                                    )}
-                                  </div>
+                                  
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50" htmlFor="name">
                       Full Name *
