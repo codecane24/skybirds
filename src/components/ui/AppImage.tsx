@@ -38,8 +38,9 @@ const AppImage = memo(function AppImage({
     fallbackSrc = '/assets/images/no_image.png',
     loading = 'lazy',
     unoptimized = false,
+    disableLoadingBg = false,
     ...props
-}: AppImageProps) {
+}: AppImageProps & { disableLoadingBg?: boolean }) {
     const [imageSrc, setImageSrc] = useState(src || fallbackSrc);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
@@ -68,10 +69,10 @@ const AppImage = memo(function AppImage({
 
     const imageClassName = useMemo(() => {
         const classes = [className];
-        if (isLoading) classes.push('bg-gray-200');
+        if (isLoading && !disableLoadingBg) classes.push('bg-gray-200');
         if (onClick) classes.push('cursor-pointer hover:opacity-90 transition-opacity duration-200');
         return classes.filter(Boolean).join(' ');
-    }, [className, isLoading, onClick]);
+    }, [className, isLoading, onClick, disableLoadingBg]);
 
     const imageProps = useMemo(() => {
         const baseProps: any = {
