@@ -21,7 +21,7 @@ export async function GET() {
     await connectDB();
 
     if (['admin', 'superadmin'].includes(session.user.role)) {
-      const bookings = await Booking.find().populate('clientId', 'name email company').sort({ createdAt: -1 }).lean();
+      const bookings = await Booking.find().populate('clientId', 'name email company phone alternatePhone').sort({ createdAt: -1 }).lean();
 
       const bookingIds = bookings.map((b: any) => b._id);
       const latestAttempts = await Payment.find({ bookingId: { $in: bookingIds } })

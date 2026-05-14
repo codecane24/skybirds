@@ -17,6 +17,7 @@ export default function EditBookingPage() {
     name: "",
     email: "",
     phone: "",
+    alternatePhone: "",
     members: 1,
     destination: "",
     description: "",
@@ -40,6 +41,7 @@ export default function EditBookingPage() {
           name: data.clientId?.name || "",
           email: data.clientId?.email || "",
           phone: data.clientId?.phone || "",
+          alternatePhone: data.clientId?.alternatePhone || "",
           members: data.travelers || 1,
           destination: data.destination || "",
           description: data.notes || "",
@@ -157,6 +159,10 @@ export default function EditBookingPage() {
           <div>
             <label className="block text-[15px] font-semibold mb-2 text-navy">Primary Phone</label>
             <input name="phone" value={form.phone} disabled className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base" />
+          </div>
+          <div>
+            <label className="block text-[15px] font-semibold mb-2 text-navy">Alternate Number</label>
+            <input name="alternatePhone" value={form.alternatePhone} disabled className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base" />
           </div>
           <div>
             <label className="block text-[15px] font-semibold mb-2 text-navy">Members</label>

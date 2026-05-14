@@ -16,7 +16,7 @@ interface Booking {
   status: string;
   paymentStatus: string;
   createdAt: string;
-  clientId?: { name: string; email: string };
+  clientId?: { name: string; email: string; phone?: string; alternatePhone?: string };
   lastPaymentAttempt?: {
     status: string;
     createdAt: string;
@@ -146,7 +146,18 @@ export default function AdminBookingsPage() {
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${statusColor(b.status)}`}>{b.status}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${statusColor(b.paymentStatus)}`}>Pay: {b.paymentStatus}</span>
                     </div>
-                    {b.clientId && <p className="text-xs text-navy/40">{b.clientId.name} · {b.clientId.email}</p>}
+                    {b.clientId && (
+                      <div className="text-xs text-navy/40 space-y-1">
+                        <p>{b.clientId.name} · {b.clientId.email}</p>
+                        {(b.clientId.phone || b.clientId.alternatePhone) && (
+                          <p>
+                            {b.clientId.phone ? `Contact: ${b.clientId.phone}` : ''}
+                            {b.clientId.phone && b.clientId.alternatePhone ? ' · ' : ''}
+                            {b.clientId.alternatePhone ? `Alt: ${b.clientId.alternatePhone}` : ''}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <p className="text-xs text-navy/30 mt-1">
                       {format(new Date(b.travelDate), 'dd MMM')} → {format(new Date(b.returnDate), 'dd MMM yyyy')} · {b.travelers} travelers
                     </p>

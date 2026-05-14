@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const { id } = await params;
     await connectDB();
-    const booking = await Booking.findById(id).populate('clientId', 'name email company phone').lean();
+    const booking = await Booking.findById(id).populate('clientId', 'name email company phone alternatePhone').lean();
     if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(normalizeBookingStatus(booking as any));
   } catch (error) {

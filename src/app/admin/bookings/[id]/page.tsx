@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 interface BookingDetail {
   _id: string; destination: string; travelDate: string; returnDate: string; travelers: number; services: string[]; totalAmount: number;
   status: string; paymentStatus: string; razorpayOrderId: string; razorpayPaymentId: string; notes: string; createdAt: string;
-  clientId?: { _id: string; name: string; email: string; phone: string; company: string };
+  clientId?: { _id: string; name: string; email: string; phone: string; alternatePhone?: string; company: string };
   attachments?: Array<{ type: string; url: string; description?: string; name?: string }>;
 }
 
@@ -97,6 +97,7 @@ export default function AdminBookingDetailPage() {
               <div><span className="text-navy/40">Name:</span> <span className="font-semibold text-navy ml-2">{booking.clientId.name}</span></div>
               <div><span className="text-navy/40">Email:</span> <span className="font-semibold text-navy ml-2">{booking.clientId.email}</span></div>
               {booking.clientId.phone && <div><span className="text-navy/40">Phone:</span> <span className="font-semibold text-navy ml-2">{booking.clientId.phone}</span></div>}
+              {booking.clientId.alternatePhone && <div><span className="text-navy/40">Alternate:</span> <span className="font-semibold text-navy ml-2">{booking.clientId.alternatePhone}</span></div>}
               {booking.clientId.company && <div><span className="text-navy/40">Company:</span> <span className="font-semibold text-navy ml-2">{booking.clientId.company}</span></div>}
             </div>
           </div>

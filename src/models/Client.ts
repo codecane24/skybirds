@@ -5,6 +5,7 @@ export interface IClient extends Document {
   email: string;
   password: string;
   phone: string;
+  alternatePhone: string;
   company: string;
   avatar: string;
   isVerified: boolean;
@@ -20,6 +21,7 @@ const ClientSchema = new Schema<IClient>({
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
   phone: { type: String, default: '' },
+  alternatePhone: { type: String, default: '' },
   company: { type: String, default: '' },
   avatar: { type: String, default: '' },
   isVerified: { type: Boolean, default: false },
