@@ -50,9 +50,26 @@ export default function PayBookingPage() {
           name: "SkyBirds Booking Payment",
           description: `Booking #${bookingId}`,
           handler: function (response) {
-            // TODO: call verify API and update status
-            toast.success("Payment successful!");
-            setPaymentStatus("paid");
+            fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            })
+              .then(async (verifyRes) => {
+                const verifyData = await verifyRes.json();
+                if (!verifyRes.ok) {
+                  throw new Error(verifyData.error || 'Payment verification failed');
+                }
+                toast.success('Payment successful!');
+                setPaymentStatus('paid');
+              })
+              .catch((verifyErr) => {
+                toast.error(verifyErr.message || 'Payment verification failed');
+              });
           },
           prefill: {
             email: booking?.clientId?.email,
@@ -144,7 +161,15 @@ export default function PayBookingPage() {
                   </button>
                 )}
                 {paymentStatus === "paid" && (
-                  <div className="text-green-700 font-bold text-lg">Payment Successful!</div>
+                  <div className="space-y-2">
+                    <div className="text-green-700 font-bold text-lg">Payment Successful!</div>
+                    <div className="text-sm text-navy/70">
+                      Payment Ref No: <b>{booking.razorpayPaymentId || 'N/A'}</b>
+                    </div>
+                    <div className="text-sm text-navy/70">
+                      Razorpay Order No: <b>{booking.razorpayOrderId || 'N/A'}</b>
+                    </div>
+                  </div>
                 )}
               </div>
             </>

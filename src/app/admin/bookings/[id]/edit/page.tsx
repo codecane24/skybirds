@@ -83,17 +83,43 @@ export default function EditBookingPage() {
     setSubmitting(true);
     setErrors({});
     try {
-      // TODO: handle file uploads and update attachments
+      const newAttachments = [];
+      for (const type of form.bookingTypes) {
+        const file = form.uploads[type];
+        if (file) {
+          const fd = new FormData();
+          fd.append('file', file);
+          fd.append('type', type);
+
+          const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+          const uploadData = await uploadRes.json();
+
+          if (!uploadRes.ok || !uploadData.url) {
+            throw new Error(uploadData.error || `Failed to upload ${type} document`);
+          }
+
+          newAttachments.push({
+            type,
+            url: uploadData.url,
+            name: file.name,
+            description: form.typeDescriptions[type] || '',
+          });
+        }
+      }
+
+      const replacedTypes = new Set(newAttachments.map((a) => a.type));
+      const existingAttachments = (form.attachments || []).filter((att) => !replacedTypes.has(att.type));
+      const attachments = [...existingAttachments, ...newAttachments];
+
       const res = await fetch(`/api/bookings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           destination: form.destination,
-          description: form.description,
-          bookingTypes: form.bookingTypes,
-          bookingAmount: form.bookingAmount,
-          typeDescriptions: form.typeDescriptions,
-          // attachments: ...
+          notes: form.description,
+          services: form.bookingTypes,
+          totalAmount: Number(form.bookingAmount),
+          attachments,
         }),
       });
       if (res.ok) {
@@ -104,7 +130,7 @@ export default function EditBookingPage() {
         toast.error(data.error || "Failed to update booking");
       }
     } catch (err) {
-      toast.error("Failed to update booking");
+      toast.error(err?.message || "Failed to update booking");
     } finally {
       setSubmitting(false);
     }
@@ -190,20 +216,57 @@ export default function EditBookingPage() {
           </div>
         </div>
         {/* Existing attachments */}
-        {form.attachments && form.attachments.length > 0 && (
-          <div className="mt-6">
-            <label className="block text-[15px] font-semibold mb-2 text-navy">Existing Attachments</label>
-            <ul className="space-y-2">
-              {form.attachments.map((att, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm">
-                  <span className="font-bold text-navy/70">{att.type}</span>
-                  <a href={att.url} target="_blank" rel="noopener" className="text-sky-brand underline">View Attachment</a>
-                  {att.description && <span className="text-navy/40">{att.description}</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="mt-6">
+          <label className="block text-[15px] font-semibold mb-2 text-navy">Existing Attachments</label>
+          {form.attachments && form.attachments.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              {form.attachments.map((att, i) => {
+                const attachmentUrl = att.url || att.imageUrl || att.path || "";
+                const lowerUrl = attachmentUrl.toLowerCase();
+                const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(lowerUrl);
+
+                if (!attachmentUrl) {
+                  return (
+                    <div key={i} className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                      File URL missing ({att.type || 'Document'})
+                    </div>
+                  );
+                }
+
+                return (
+                  <a
+                    key={i}
+                    href={attachmentUrl}
+                    target="_blank"
+                    rel="noopener"
+                    className="block rounded-lg border border-navy/10 hover:border-sky-brand/40 transition overflow-hidden bg-bg"
+                  >
+                    <div className="px-2 py-1.5 border-b border-navy/10 bg-white">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-navy/60">{att.type || 'Document'}</p>
+                    </div>
+                    <div className="h-20 flex items-center justify-center bg-white">
+                      {isImage ? (
+                        <img src={attachmentUrl} alt={att.name || att.type || 'Attachment'} className="max-h-full max-w-full object-cover" />
+                      ) : (
+                        <div className="text-center px-3">
+                          <p className="text-2xl mb-1">📎</p>
+                          <p className="text-xs font-semibold text-navy/70 break-all">{att.name || 'Open document'}</p>
+                        </div>
+                      )}
+                    </div>
+                    {att.description && (
+                      <div className="px-2 py-1.5 text-[10px] text-navy/50 border-t border-navy/10 bg-white line-clamp-2">
+                        {att.description}
+                      </div>
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-navy/40">No attachments found for this booking.</p>
+          )}
+        </div>
         <div className="pt-6 flex justify-end">
           <button type="submit" className="px-8 py-3 rounded-full bg-sky-brand text-white font-bold text-lg shadow-amber hover:bg-sky-brand/90 transition-all min-w-[180px]" disabled={submitting}>
             {submitting ? "Saving..." : "Save Changes"}

@@ -6,12 +6,31 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
-interface Booking { _id: string; destination: string; travelDate: string; returnDate: string; travelers: number; totalAmount: number; status: string; paymentStatus: string; createdAt: string; clientId?: { name: string; email: string }; }
+interface Booking {
+  _id: string;
+  destination: string;
+  travelDate: string;
+  returnDate: string;
+  travelers: number;
+  totalAmount: number;
+  status: string;
+  paymentStatus: string;
+  createdAt: string;
+  clientId?: { name: string; email: string };
+  lastPaymentAttempt?: {
+    status: string;
+    createdAt: string;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+  } | null;
+}
 
 export default function AdminBookingsPage() {
   const [items, setItems] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const fetchItems = async () => {
     const res = await fetch('/api/bookings');
@@ -27,6 +46,23 @@ export default function AdminBookingsPage() {
     if (filter === 'confirmed') return b.status === 'confirmed';
     if (filter === 'pending') return b.status === 'pending';
     if (filter === 'cancelled') return b.status === 'cancelled';
+    return true;
+  }).filter((b) => {
+    if (!fromDate && !toDate) return true;
+    const bookingDate = new Date(b.createdAt);
+
+    if (fromDate) {
+      const from = new Date(fromDate);
+      from.setHours(0, 0, 0, 0);
+      if (bookingDate < from) return false;
+    }
+
+    if (toDate) {
+      const to = new Date(toDate);
+      to.setHours(23, 59, 59, 999);
+      if (bookingDate > to) return false;
+    }
+
     return true;
   });
 
@@ -65,6 +101,38 @@ export default function AdminBookingsPage() {
           ))}
         </div>
 
+        <div className="bg-white rounded-2xl p-4 border border-navy/10 mb-6">
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-navy/50 mb-1">From Date</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-navy/10 text-sm text-navy bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-navy/50 mb-1">To Date</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-navy/10 text-sm text-navy bg-white"
+              />
+            </div>
+            <button
+              onClick={() => {
+                setFromDate('');
+                setToDate('');
+              }}
+              className="px-4 py-2 rounded-lg text-sm font-bold bg-navy/5 text-navy hover:bg-navy/10 transition"
+            >
+              Clear Date Filter
+            </button>
+          </div>
+        </div>
+
         {filtered.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 shadow-card text-center"><p className="text-navy/40">No bookings found.</p></div>
         ) : (
@@ -83,32 +151,48 @@ export default function AdminBookingsPage() {
                       {format(new Date(b.travelDate), 'dd MMM')} → {format(new Date(b.returnDate), 'dd MMM yyyy')} · {b.travelers} travelers
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
                     <p className="text-lg font-bold" style={{ color: '#2A7FD4' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
-                    <select
-                      value={b.status}
-                      onChange={(e) => updateStatus(b._id, e.target.value)}
-                      className="text-xs font-bold border border-navy/10 rounded-lg px-2 py-1.5 bg-transparent text-navy"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    <Link href={`/admin/bookings/${b._id}`} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-brand/10 text-sky-brand">View</Link>
-                    {b.status === 'pending' && (
-                      <Link href={`/admin/bookings/${b._id}/edit`} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-400/10 text-amber-600 border border-amber-400/20 hover:bg-amber-400/20 transition">Edit</Link>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <select
+                        value={b.status}
+                        onChange={(e) => updateStatus(b._id, e.target.value)}
+                        className="text-xs font-bold border border-navy/10 rounded-lg px-2 py-1.5 bg-transparent text-navy"
+                      >
+                        {b.paymentStatus !== 'paid' && <option value="pending">Pending</option>}
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        {b.paymentStatus !== 'paid' && <option value="cancelled">Cancelled</option>}
+                      </select>
+                      <Link href={`/admin/bookings/${b._id}`} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-brand/10 text-sky-brand">View</Link>
+                      {b.status === 'pending' && (
+                        <Link href={`/admin/bookings/${b._id}/edit`} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-400/10 text-amber-600 border border-amber-400/20 hover:bg-amber-400/20 transition">Edit</Link>
+                      )}
+                      {b.paymentStatus !== 'paid' ? (
+                        <button
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-brand/10 text-amber-brand border border-amber-brand/20 hover:bg-amber-brand/20 transition"
+                          onClick={() => {
+                            const url = `${window.location.origin}/pay/${b._id}`;
+                            navigator.clipboard.writeText(url);
+                            toast.success('Payment link copied!');
+                          }}
+                        >
+                          Send Payment Link
+                        </button>
+                      ) : (
+                        <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-100 text-green-700">
+                          Payment: Paid
+                        </span>
+                      )}
+                    </div>
+
+                    {b.paymentStatus !== 'paid' && (
+                      <p className="text-[11px] text-navy/50">
+                        Last payment status:{' '}
+                        <b className="uppercase">{b.lastPaymentAttempt?.status || 'not attempted'}</b>
+                        {b.lastPaymentAttempt?.createdAt ? ` • ${format(new Date(b.lastPaymentAttempt.createdAt), 'dd MMM yyyy, hh:mm a')}` : ''}
+                      </p>
                     )}
-                    <button
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-brand/10 text-amber-brand border border-amber-brand/20 hover:bg-amber-brand/20 transition"
-                      onClick={() => {
-                        const url = `${window.location.origin}/pay/${b._id}`;
-                        navigator.clipboard.writeText(url);
-                        toast.success('Payment link copied!');
-                      }}
-                    >
-                      Send Payment Link
-                    </button>
                   </div>
                 </div>
               </div>

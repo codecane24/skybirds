@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/mongodb';
 import Booking from '@/models/Booking';
 import Payment from '@/models/Payment';
@@ -10,11 +9,6 @@ import { format } from 'date-fns';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id || session.user.role !== 'client') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -54,7 +48,8 @@ export async function POST(req: NextRequest) {
 
     // Send confirmation email
     if (booking) {
-      const client = await Client.findById(session.user.id);
+      const clientId = payment.clientId || booking.clientId;
+      const client = clientId ? await Client.findById(clientId) : null;
       if (client) {
         try {
           await sendEmail({
