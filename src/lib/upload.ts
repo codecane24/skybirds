@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink, access } from 'fs/promises';
+import { mkdir, writeFile, unlink } from 'fs/promises';
 import path from 'path';
 
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
@@ -21,7 +21,8 @@ async function isFileSystemWritable(): Promise<boolean> {
     await writeFile(testFile, 'test');
     await unlink(testFile);
     return true;
-  } catch {
+  } catch (error) {
+    console.log('File system not writable:', error instanceof Error ? error.message : String(error));
     return false;
   }
 }
@@ -48,6 +49,16 @@ async function saveToLocalFileSystem(file: File, subDir: string): Promise<string
 
 // Vercel Blob upload (serverless production)
 async function saveToVercelBlob(file: File, subDir: string): Promise<string> {
+  // Check if Vercel Blob token is configured
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error(
+      'BLOB_READ_WRITE_TOKEN not found. For Vercel deployment:\n' +
+      '1. Go to Vercel Dashboard → Storage → Create Blob Store\n' +
+      '2. Token will be auto-added to environment variables\n' +
+      '3. Redeploy your app'
+    );
+  }
+
   try {
     const { put } = await import('@vercel/blob');
     
@@ -66,23 +77,34 @@ async function saveToVercelBlob(file: File, subDir: string): Promise<string> {
     return blob.url;
   } catch (error) {
     console.error('Vercel Blob upload failed:', error);
-    throw new Error('Cloud storage not configured. Please set BLOB_READ_WRITE_TOKEN environment variable or use a VPS with writable file system.');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Cloud storage upload failed: ${errorMessage}`);
   }
 }
 
 // Main upload function - automatically chooses the right method
 export async function saveUploadedImage(file: File, subDir: string): Promise<string> {
-  // Try local file system first (works in development and VPS)
-  const canWriteLocally = await isFileSystemWritable();
-  
-  if (canWriteLocally) {
-    console.log('Using local file system for upload');
-    return saveToLocalFileSystem(file, subDir);
+  try {
+    // Try local file system first (works in development and VPS)
+    console.log('Attempting local file system upload...');
+    return await saveToLocalFileSystem(file, subDir);
+  } catch (localError) {
+    // If local fails, fall back to Vercel Blob for serverless environments
+    console.log('Local file system failed, trying Vercel Blob...');
+    console.log('Local error:', localError instanceof Error ? localError.message : String(localError));
+    
+    try {
+      return await saveToVercelBlob(file, subDir);
+    } catch (cloudError) {
+      console.error('Both upload methods failed');
+      console.error('Local error:', localError);
+      console.error('Cloud error:', cloudError);
+      throw new Error(
+        'Image upload failed. ' +
+        (cloudError instanceof Error ? cloudError.message : 'Please contact support.')
+      );
+    }
   }
-  
-  // Fall back to Vercel Blob for serverless environments
-  console.log('Using Vercel Blob for upload (serverless environment)');
-  return saveToVercelBlob(file, subDir);
 }
 
 // Delete uploaded image - handles both local and cloud storage

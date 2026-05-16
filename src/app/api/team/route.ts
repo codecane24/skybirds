@@ -45,7 +45,18 @@ export async function POST(req: NextRequest) {
       let imageUrl = String(formData.get('imageUrl') || '').trim();
 
       if (image instanceof File && image.size > 0) {
-        imageUrl = await saveUploadedImage(image, 'team');
+        console.log('Processing image upload, size:', image.size, 'type:', image.type);
+        try {
+          imageUrl = await saveUploadedImage(image, 'team');
+          console.log('Image uploaded successfully:', imageUrl);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          const errorMsg = uploadError instanceof Error ? uploadError.message : 'Upload failed';
+          return NextResponse.json({ 
+            error: 'Image upload failed', 
+            details: errorMsg 
+          }, { status: 500 });
+        }
       }
 
       data = {
@@ -66,6 +77,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(teamMember, { status: 201 });
   } catch (error) {
     console.error('Team create error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: errorMsg 
+    }, { status: 500 });
   }
 }

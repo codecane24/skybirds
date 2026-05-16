@@ -38,7 +38,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       let imageUrl = String(formData.get('imageUrl') || existing.imageUrl || '').trim();
 
       if (image instanceof File && image.size > 0) {
-        imageUrl = await saveUploadedImage(image, 'team');
+        console.log('Processing image upload, size:', image.size, 'type:', image.type);
+        try {
+          imageUrl = await saveUploadedImage(image, 'team');
+          console.log('Image uploaded successfully:', imageUrl);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          const errorMsg = uploadError instanceof Error ? uploadError.message : 'Upload failed';
+          return NextResponse.json({ 
+            error: 'Image upload failed', 
+            details: errorMsg 
+          }, { status: 500 });
+        }
       }
 
       data = {
@@ -65,7 +76,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json(teamMember);
   } catch (error) {
     console.error('Team update error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Error stack:', errorStack);
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: errorMsg,
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    }, { status: 500 });
   }
 }
 
