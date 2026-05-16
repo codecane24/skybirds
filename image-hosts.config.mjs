@@ -19,4 +19,12 @@ export const imageHosts = [
         protocol: 'https',
         hostname: 'img.rocket.new',
     },
+    {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+    },
+    {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+    },
 ];
