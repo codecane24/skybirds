@@ -153,7 +153,7 @@ export default function HeroSection() {
             <div className="flex justify-between items-start mb-6">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-navy/40 mb-1">Trusted by</p>
-                <p className="text-4xl font-bold text-navy tracking-tight">500+</p>
+                <p className="text-4xl font-bold text-navy tracking-tight">100+</p>
                 <p className="text-sm font-semibold text-navy/60">Corporate Clients</p>
               </div>
               <div className="w-10 h-10 rounded-full border border-navy/10 flex items-center justify-center">
@@ -164,10 +164,10 @@ export default function HeroSection() {
             </div>
             <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-navy/30">
               <div className="flex gap-3">
-                <span className="text-navy/20">(Est. 2015)</span>
+                <span className="text-navy/20">(Est. 2012)</span>
                 <span className="text-navy">(Since)</span>
               </div>
-              <span className="text-navy/40">10+ yrs</span>
+              <span className="text-navy/40">14+ yrs</span>
             </div>
           </div>
         </div>
