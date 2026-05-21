@@ -37,11 +37,11 @@ interface EmailOptions {
   html: string;
 }
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, cc, subject, html }: EmailOptions) {
   return transporter.sendMail({
     from: `"Sky Birds" <${process.env.SMTP_USER}>`,
     to,
-    cc: arguments[0].cc,
+    cc,
     subject,
     html,
   });

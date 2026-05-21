@@ -23,6 +23,7 @@ export default function ContactSection() {
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaValid, setCaptchaValid] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // GSAP animation
@@ -82,6 +83,7 @@ export default function ContactSection() {
       toast.error('Captcha is incorrect.');
       return;
     }
+    setLoading(true);
     try {
       const res = await fetch('/api/contacts', {
         method: 'POST',
@@ -97,6 +99,8 @@ export default function ContactSection() {
         }),
       });
       if (res.ok) {
+        setFormState({ name: '', company: '', email: '', phone: '', destination: '', travelers: '', message: '', captcha: '' });
+        setCaptchaInput('');
         setSubmitted(true);
         toast.success('Inquiry submitted successfully!');
       } else {
@@ -105,6 +109,8 @@ export default function ContactSection() {
       }
     } catch {
       toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -375,13 +381,26 @@ export default function ContactSection() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                  disabled={loading}
+                  className="w-full py-4 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#0F1F3D' }}
                 >
-                  Send Enquiry
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                    <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send Enquiry
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </>
+                  )}
                 </button>
                 <p className="text-center text-[10px] text-navy/35 uppercase tracking-wider">
                   No spam. No hidden charges. Response within 4 hours.
