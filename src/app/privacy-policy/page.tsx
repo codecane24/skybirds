@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
         <section className="max-w-3xl mx-auto py-8 px-4 bg-white rounded-xl shadow">
           <p className="mb-4">Last Updated: April 2026</p>
           <p className="mb-4">
-            At Sky Bird, we value your trust and are committed to protecting your personal information. This policy outlines how we collect, use, and safeguard your data when you use our website and services.
+            At Sky Birds, we value your trust and are committed to protecting your personal information. This policy outlines how we collect, use, and safeguard your data when you use our website and services.
           </p>
           <h2 className="text-xl font-semibold mt-8 mb-2">Information We Collect</h2>
           <p className="mb-4">To provide seamless travel and visa services, we collect:</p>
