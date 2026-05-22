@@ -11,14 +11,14 @@ export default function AdminTestimonialFormPage() {
   const params = useParams();
   const isNew = params.id === 'new';
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', role: '', company: '', quote: '', imageUrl: '', accentColor: '#4F8BD2', isActive: true, order: 0 });
+  const [form, setForm] = useState({ name: '', role: '', company: '', quote: '', imageUrl: '', accentColor: '#4F8BD2', isActive: true, order: 0, rating: 5 });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
   useEffect(() => {
     if (!isNew) {
       fetch(`/api/testimonials/${params.id}`).then(r => r.json()).then((data) => {
-        if (data._id) setForm({ name: data.name || '', role: data.role || '', company: data.company || '', quote: data.quote || '', imageUrl: data.imageUrl || '', accentColor: data.accentColor || '#4F8BD2', isActive: data.isActive ?? true, order: data.order || 0 });
+        if (data._id) setForm({ name: data.name || '', role: data.role || '', company: data.company || '', quote: data.quote || '', imageUrl: data.imageUrl || '', accentColor: data.accentColor || '#4F8BD2', isActive: data.isActive ?? true, order: data.order || 0, rating: data.rating ?? 5 });
       });
     }
   }, [params.id, isNew]);
@@ -49,6 +49,7 @@ export default function AdminTestimonialFormPage() {
     payload.append('accentColor', form.accentColor);
     payload.append('isActive', String(form.isActive));
     payload.append('order', String(form.order));
+    payload.append('rating', String(form.rating));
     payload.append('imageUrl', form.imageUrl || '');
     if (imageFile) payload.append('image', imageFile);
 
@@ -109,6 +110,24 @@ export default function AdminTestimonialFormPage() {
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50">Quote *</label>
             <textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} className="form-input min-h-[100px] resize-none" required />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50">Star Rating</label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setForm({ ...form, rating: star })}
+                  className="text-3xl transition-transform hover:scale-110 focus:outline-none"
+                  style={{ color: star <= form.rating ? '#E8A020' : '#D1D5DB' }}
+                  aria-label={`${star} star`}
+                >
+                  &#9733;
+                </button>
+              ))}
+              <span className="ml-2 self-center text-sm font-bold text-navy/50">{form.rating} / 5</span>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-5">
             <div className="space-y-1.5">

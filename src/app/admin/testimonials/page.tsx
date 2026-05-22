@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 
-interface Testimonial { _id: string; name: string; role: string; company: string; quote: string; imageUrl?: string; isActive: boolean; order: number; }
+interface Testimonial { _id: string; name: string; role: string; company: string; quote: string; imageUrl?: string; isActive: boolean; order: number; rating?: number; }
 
 export default function AdminTestimonialsPage() {
   const [items, setItems] = useState<Testimonial[]>([]);
@@ -68,6 +68,13 @@ export default function AdminTestimonialsPage() {
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {item.isActive ? 'Active' : 'Inactive'}
                     </span>
+                    {item.rating != null && (
+                      <span className="flex gap-0.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <span key={s} style={{ color: s <= item.rating! ? '#E8A020' : '#D1D5DB', fontSize: 13 }}>&#9733;</span>
+                        ))}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-navy/40">{item.role} at {item.company}</p>
                   <p className="text-sm text-navy/60 mt-2 line-clamp-2">&ldquo;{item.quote}&rdquo;</p>

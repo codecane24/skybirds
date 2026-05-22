@@ -113,7 +113,11 @@ export default function WhyUsSection() {
                   <span className="block rounded-full shadow bg-white p-[8px]">
                     <img src={testimonials[current].imageUrl} alt={testimonials[current].name} className="w-36 h-36 rounded-full object-cover shadow-xl" />
                   </span>
-                  <p className="font-serif italic text-2xl mt-2 mb-0.5" style={{ color: '#E8A020' }}>{testimonials[current].rating}â˜…</p>
+                  <div className="flex gap-0.5 mt-2 justify-center">
+                    {[1,2,3,4,5].map((s) => (
+                      <span key={s} className="text-xl" style={{ color: s <= Math.round(testimonials[current].rating) ? '#E8A020' : '#D1D5DB' }}>&#9733;</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

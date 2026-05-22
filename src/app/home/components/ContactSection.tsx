@@ -170,8 +170,8 @@ export default function ContactSection() {
             {/* Trust badges */}
             <div className="grid grid-cols-2 gap-4">
               {[
-                { stat: '500+', label: 'Corporate Clients' },
-                { stat: '10 yrs', label: 'Industry Experience' },
+                { stat: '100+', label: 'Corporate Clients' },
+                { stat: '14 yrs', label: 'Industry Experience' },
                 { stat: '50+', label: 'Visa Destinations' },
                 { stat: '24/7', label: 'Travel Support' },
               ].map((badge) => (
