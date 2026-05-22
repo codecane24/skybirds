@@ -117,7 +117,8 @@ export default function OurTeamSection() {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.42, ease: [0.4, 0, 0.2, 1] }}
-                  className="aspect-square rounded-2xl overflow-hidden"
+                  className="aspect-square rounded-2xl overflow-hidden transition-all duration-500"
+                  style={{ filter: isActive ? 'none' : 'grayscale(100%)' }}
                 >
                   <AppImage
                     src={member.imageUrl || '/assets/images/no_image.png'}
