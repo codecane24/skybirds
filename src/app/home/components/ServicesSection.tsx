@@ -247,19 +247,17 @@ export default function ServicesSection() {
               <span className="h-1.5 w-1.5 rounded-full pulse-amber bg-amber-brand" />
               What We Do
             </span>
-
             <div className="space-y-5">
               <h2 className="svc-heading text-4xl font-bold leading-[1.02] tracking-tight text-navy opacity-0 md:text-5xl lg:text-6xl">
                 Your World, Simplified.
                 <br />
-                <span className="font-serif text-amber-brand italic font-light">One Partner. Every Destination.</span>
+                <span className="font-serif text-amber-brand italic font-light">One Partner For Every Destination.</span>
               </h2>
 
               <p className="svc-subtext max-w-2xl text-base font-medium leading-relaxed text-navy/60 opacity-0 md:text-lg">
                 From the moment you plan to the moment you return, we manage your entire travel ecosystem. No multiple logins, no fragmented support—just one dedicated team ensuring your journey is seamless from start to finish.
               </p>
             </div>
-
             <div className="flex flex-wrap gap-3">
               {serviceHighlights.map((item) => (
                 <span
