@@ -65,7 +65,7 @@ const fallbackServices: ServiceCard[] = [
 
 const colSpanMap: Record<number, string> = { 1: 'lg:col-span-1', 2: 'lg:col-span-2' };
 const serviceNumbers = ['01', '02', '03', '04', '05', '06'];
-const serviceHighlights = ['Flights', 'Visas', 'Hotels', 'Transfers'];
+const serviceHighlights = ['Flights', 'Visas', 'Hotels', 'Transfers','Travel Insurance'];
 
 export default function ServicesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -332,12 +332,12 @@ export default function ServicesSection() {
                 className={`svc-card group relative cursor-default overflow-hidden rounded-[30px] p-7 opacity-0 transition-all duration-500 md:p-8 ${svc.colSpan}`}
                 style={{
                   background: isActive
-                    ? 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,249,252,0.98) 100%)'
-                    : 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,249,246,0.92) 100%)',
-                  border: `1px solid ${isActive ? 'rgba(42,127,212,0.18)' : 'rgba(15,31,61,0.08)'}`,
+                    ? 'linear-gradient(160deg, #0F1F3D 0%, #091328 100%)'
+                    : 'linear-gradient(160deg, #0F1F3D 0%, #0c1838 100%)',
+                  border: `1px solid ${isActive ? 'rgba(232,160,32,0.4)' : 'rgba(255,255,255,0.08)'}`,
                   boxShadow: isActive
-                    ? '0 20px 45px rgba(15,31,61,0.12)'
-                    : '0 10px 30px rgba(15,31,61,0.06)',
+                    ? '0 20px 45px rgba(0,0,0,0.4), 0 0 0 1px rgba(232,160,32,0.15)'
+                    : '0 10px 30px rgba(0,0,0,0.25)',
                   transform: isActive ? 'translateY(-6px)' : 'translateY(0px)',
                 }}
                 onMouseEnter={() => setActiveCard(svc.id)}
@@ -353,12 +353,12 @@ export default function ServicesSection() {
                 />
                 <div
                   className="absolute -right-10 -top-10 h-32 w-32 rounded-full transition-all duration-500"
-                  style={{ background: isActive ? 'rgba(42,127,212,0.08)' : 'rgba(15,31,61,0.03)' }}
+                  style={{ background: isActive ? 'rgba(232,160,32,0.12)' : 'rgba(232,160,32,0.04)' }}
                 />
 
                 <span
                   className="pointer-events-none absolute right-6 top-5 select-none text-[62px] font-bold leading-none transition-all duration-500"
-                  style={{ color: isActive ? 'rgba(42,127,212,0.12)' : 'rgba(15,31,61,0.05)' }}
+                  style={{ color: isActive ? 'rgba(232,160,32,0.18)' : 'rgba(255,255,255,0.06)' }}
                 >
                   {num}
                 </span>
@@ -367,7 +367,7 @@ export default function ServicesSection() {
                   <div
                     className="absolute inset-0 rounded-2xl transition-all duration-500"
                     style={{
-                      backgroundColor: isActive ? 'rgba(232,160,32,0.18)' : 'rgba(15,31,61,0.05)',
+                      backgroundColor: isActive ? 'rgba(232,160,32,0.28)' : 'rgba(255,255,255,0.07)',
                       transform: isActive ? 'rotate(6deg) scale(1.05)' : 'rotate(0deg) scale(1)',
                     }}
                   />
@@ -375,8 +375,8 @@ export default function ServicesSection() {
                     className="relative flex h-full w-full items-center justify-center rounded-2xl transition-all duration-500"
                     style={{
                       backgroundColor: isActive
-                        ? 'rgba(255,255,255,0.98)'
-                        : 'rgba(255,255,255,0.82)',
+                        ? 'rgba(255,255,255,0.14)'
+                        : 'rgba(255,255,255,0.09)',
                     }}
                   >
                     <Icon
@@ -384,7 +384,7 @@ export default function ServicesSection() {
                       size={24}
                       variant="outline"
                       className="transition-colors duration-500"
-                      style={{ color: isActive ? '#E8A020' : '#2A7FD4' }}
+                      style={{ color: isActive ? '#E8A020' : 'rgba(255,255,255,0.75)' }}
                     />
                   </div>
                 </div>
@@ -392,18 +392,18 @@ export default function ServicesSection() {
                 <span
                   className="mb-4 inline-block rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-widest transition-all duration-500"
                   style={{
-                    backgroundColor: isActive ? 'rgba(42,127,212,0.1)' : 'rgba(15,31,61,0.05)',
-                    color: isActive ? '#2A7FD4' : 'rgba(15,31,61,0.45)',
+                    backgroundColor: isActive ? 'rgba(232,160,32,0.18)' : 'rgba(255,255,255,0.08)',
+                    color: isActive ? '#E8A020' : 'rgba(255,255,255,0.5)',
                   }}
                 >
                   {svc.tag}
                 </span>
 
-                <h3 className="mb-3 text-lg font-bold text-navy">{svc.title}</h3>
+                <h3 className="mb-3 text-lg font-bold" style={{ color: '#E8A020' }}>{svc.title}</h3>
 
                 <p
                   className="text-[13px] font-medium leading-relaxed transition-all duration-500"
-                  style={{ color: isActive ? 'rgba(15,31,61,0.72)' : 'rgba(15,31,61,0.55)' }}
+                  style={{ color: isActive ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)' }}
                 >
                   {svc.desc}
                 </p>
@@ -437,7 +437,7 @@ export default function ServicesSection() {
                   className="pointer-events-none absolute inset-0 rounded-[30px] transition-opacity duration-500"
                   style={{
                     opacity: isActive ? 1 : 0,
-                    boxShadow: '0 0 80px rgba(42,127,212,0.08) inset',
+                    boxShadow: '0 0 80px rgba(232,160,32,0.1) inset',
                   }}
                 />
               </div>
