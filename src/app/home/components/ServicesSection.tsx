@@ -427,12 +427,11 @@ export default function ServicesSection() {
                       d="M2 7h10M8 3l4 4-4 4"
                       stroke="currentColor"
                       strokeWidth="1.5"
-                      strokeLinecap="round"
+                        strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </svg>
                 </div>
-
                 <div
                   className="pointer-events-none absolute inset-0 rounded-[30px] transition-opacity duration-500"
                   style={{
