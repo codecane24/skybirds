@@ -1,29 +1,16 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
-// Simple testimonials array (replace with API if needed)
-const testimonials = [
-  {
-    text: 'Sky Birds made our business travel seamless and cost-effective. Highly recommended!',
-    name: 'Rahul Mehta',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a',
-    rating: 5
-  },
-  {
-    text: 'Excellent service and transparent pricing. Our team loved the experience.',
-    name: 'Priya Nair',
-    image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e',
-    rating: 4.5
-  },
-  {
-    text: 'Professional, reliable, and always available. Sky Birds is our go-to travel partner.',
-    name: 'Arjun Krishnamurthy',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
-    rating: 5
-  },
-];
+
+interface Testimonial {
+  _id: string;
+  name: string;
+  quote: string;
+  imageUrl: string;
+  rating: number;
+}
 
 const differentiators = [
 {
@@ -34,13 +21,13 @@ const differentiators = [
 {
   icon: 'AdjustmentsHorizontalIcon',
   title: 'Fully Customized Itineraries',
-  desc: "No one-size-fits-all packages. Your team's schedule, preferences, and budget — we build around you."
+  desc: "No one-size-fits-all packages. Your team's schedule, preferences, and budget â€” we build around you."
 },
 {
   icon: 'BriefcaseIcon', title: 'Corporate Account Management', desc: 'Dedicated relationship manager, consolidated invoicing, GST-compliant billing, and travel policy compliance.'
 },
 {
-  icon: 'ShieldCheckIcon', title: 'Risk-Free Travel Planning', desc: 'Flexible cancellation, rebooking support, and travel insurance options — so disruptions don\'t derail your business.'
+  icon: 'ShieldCheckIcon', title: 'Risk-Free Travel Planning', desc: "Flexible cancellation, rebooking support, and travel insurance options â€” so disruptions don't derail your business."
 }];
 
 
@@ -49,9 +36,22 @@ export default function WhyUsSection() {
   const listRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/testimonials')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setTestimonials(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   // Auto-advance testimonial every 5 seconds
   useEffect(() => {
+    if (!testimonials.length) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setCurrent((prev) => (prev + 1) % testimonials.length);
@@ -59,7 +59,7 @@ export default function WhyUsSection() {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [current]);
+  }, [current, testimonials.length]);
 
   return (
     <section
@@ -68,7 +68,7 @@ export default function WhyUsSection() {
       className="max-w-7xl mx-auto w-full bg-white rounded-5xl shadow-card px-8 md:px-16 py-16 md:py-20">
       <div className="grid lg:grid-cols-2 gap-16 md:gap-20 items-center">
 
-        {/* Left — Testimonial Carousel in Circle with spinning border */}
+        {/* Left â€” Testimonial Carousel in Circle with spinning border */}
         <div className="relative opacity-100 flex flex-col items-center justify-center min-h-[520px]">
           <div className="relative flex items-center justify-center w-[420px] h-[420px] max-w-full max-h-full">
             {/* Spinning dashed ring wraps only the testimonial circle */}
@@ -84,33 +84,43 @@ export default function WhyUsSection() {
             />
             {/* Circular testimonial */}
             <div className="aspect-square rounded-full overflow-hidden border-8 border-white shadow-card-lg relative z-10 flex items-center justify-center bg-[#F8F8F8] w-full h-full">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={current}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -30 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center h-full w-full p-8 text-center"
-                >
-                  <p className="font-serif italic text-lg md:text-2xl mb-4 text-navy">“{testimonials[current].text}”</p>
-                  <span className="font-bold text-navy text-base md:text-lg">{testimonials[current].name}</span>
-                </motion.div>
-              </AnimatePresence>
+              {loading ? (
+                <div className="flex items-center justify-center h-full w-full">
+                  <div className="w-10 h-10 border-4 border-navy/20 border-t-navy rounded-full animate-spin" />
+                </div>
+              ) : testimonials.length === 0 ? (
+                <p className="font-serif italic text-lg text-navy/50 p-8 text-center">No testimonials yet.</p>
+              ) : (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={current}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -30 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center justify-center h-full w-full p-8 text-center"
+                  >
+                    <p className="font-serif italic text-lg md:text-2xl mb-4 text-navy">"{testimonials[current].quote}"</p>
+                    <span className="font-bold text-navy text-base md:text-lg">{testimonials[current].name}</span>
+                  </motion.div>
+                </AnimatePresence>
+              )}
             </div>
             {/* Client image - further down right, above ring */}
-            <div className="absolute z-20" style={{ bottom: '-56px', right: '-56px' }}>
-              <div className="flex flex-col items-center">
-                <span className="block rounded-full shadow bg-white p-[8px]">
-                  <img src={testimonials[current].image} alt={testimonials[current].name} className="w-36 h-36 rounded-full object-cover shadow-xl" />
-                </span>
-                <p className="font-serif italic text-2xl mt-2 mb-0.5" style={{ color: '#E8A020' }}>{testimonials[current].rating}★</p>
+            {!loading && testimonials.length > 0 && (
+              <div className="absolute z-20" style={{ bottom: '-56px', right: '-56px' }}>
+                <div className="flex flex-col items-center">
+                  <span className="block rounded-full shadow bg-white p-[8px]">
+                    <img src={testimonials[current].imageUrl} alt={testimonials[current].name} className="w-36 h-36 rounded-full object-cover shadow-xl" />
+                  </span>
+                  <p className="font-serif italic text-2xl mt-2 mb-0.5" style={{ color: '#E8A020' }}>{testimonials[current].rating}â˜…</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Right — Differentiators */}
+        {/* Right â€” Differentiators */}
         <div className="space-y-8 bg-white rounded-3xl p-8 md:p-10">
           <div className="space-y-4">
             <span
@@ -123,7 +133,7 @@ export default function WhyUsSection() {
               <span className="font-serif italic font-light" style={{ color: '#E8A020' }}>Not Just Booking Trips.</span>
             </h2>
             <p className="text-navy/70 text-base leading-relaxed font-medium">
-              We act as your in-house travel desk — proactive, accountable, and always aligned with your business goals.
+              We act as your in-house travel desk â€” proactive, accountable, and always aligned with your business goals.
             </p>
           </div>
 
