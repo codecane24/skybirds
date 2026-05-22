@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import Icon from '@/components/ui/AppIcon';
 
 interface Service { _id: string; icon: string; title: string; description: string; tag: string; isActive: boolean; order: number; }
 
@@ -47,7 +48,13 @@ export default function AdminServicesPage() {
           <div className="space-y-3">
             {items.map((item) => (
               <div key={item._id} className="bg-white rounded-2xl p-5 shadow-card flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-bg">{item.icon || '⚙️'}</div>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#E8A020]/10 to-[#2A7FD4]/10 shrink-0">
+                  {item.icon ? (
+                    <Icon name={item.icon as Parameters<typeof Icon>[0]['name']} size={22} variant="outline" style={{ color: '#2A7FD4' }} />
+                  ) : (
+                    <span className="text-xl">⚙️</span>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-bold text-navy text-sm">{item.title}</h3>
