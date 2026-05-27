@@ -7,6 +7,22 @@ import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import AppIcon from "@/components/ui/AppIcon";
+import { DEFAULT_CURRENCY, formatMoney, RAZORPAY_SUPPORTED_CURRENCIES } from "@/lib/currency";
+
+interface BookingFormState {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone: string;
+  members: number;
+  destination: string;
+  description: string;
+  bookingTypes: string[];
+  uploads: Record<string, File | undefined>;
+  bookingAmount: string;
+  currency: string;
+  typeDescriptions: Record<string, string>;
+}
 
 const bookingTypes = [
   { label: "Ticket", value: "ticket" },
@@ -25,6 +41,8 @@ interface PendingBooking {
   destination: string;
   travelers: number;
   totalAmount: number;
+  currency?: string;
+  conversionRate?: number;
   status: string;
   paymentStatus: string;
   createdAt: string;
@@ -33,7 +51,7 @@ interface PendingBooking {
 
 export default function AdminBookingFormPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<BookingFormState>({
     name: "",
     email: "",
     phone: "",
@@ -44,6 +62,7 @@ export default function AdminBookingFormPage() {
     bookingTypes: [],
     uploads: {},
     bookingAmount: "",
+    currency: DEFAULT_CURRENCY,
     typeDescriptions: {},
   });
   const [submitting, setSubmitting] = useState(false);
@@ -59,8 +78,10 @@ export default function AdminBookingFormPage() {
     setAllowDuplicate(false);
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
+    const checked = target.checked;
     if (name === "email" || name === "phone" || name === "alternatePhone") {
       resetDuplicateState();
     }
@@ -75,10 +96,13 @@ export default function AdminBookingFormPage() {
     } else if (type === "file") {
       setForm((prev) => ({
         ...prev,
-        uploads: { ...prev.uploads, [name]: e.target.files[0] },
+        uploads: { ...prev.uploads, [name]: target.files?.[0] },
       }));
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm((prev) => ({
+        ...prev,
+        [name]: name === "members" ? Number(value) : value,
+      }));
     }
   };
 
@@ -119,14 +143,14 @@ export default function AdminBookingFormPage() {
     }
   };
 
-  const handleTypeDescription = (type, value) => {
+  const handleTypeDescription = (type: string, value: string) => {
     setForm((prev) => ({
       ...prev,
       typeDescriptions: { ...prev.typeDescriptions, [type]: value },
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
@@ -177,6 +201,7 @@ export default function AdminBookingFormPage() {
           description: form.description,
           bookingTypes: form.bookingTypes,
           bookingAmount: form.bookingAmount,
+          currency: form.currency,
           typeDescriptions: form.typeDescriptions,
           attachments,
           allowDuplicate,
@@ -268,7 +293,7 @@ export default function AdminBookingFormPage() {
                       <div key={b._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg bg-white border border-amber-100 px-3 py-2">
                         <div className="text-xs text-navy/70">
                           <p className="font-semibold text-navy">{b.destination} - {format(new Date(b.createdAt), 'dd MMM yyyy, hh:mm a')}</p>
-                          <p>Travelers: {b.travelers} | Amount: INR {Number(b.totalAmount || 0).toLocaleString('en-IN')}</p>
+                          <p>Travelers: {b.travelers} | Amount: {formatMoney(b.totalAmount, b.currency)}</p>
                         </div>
                         <Link href={`/admin/bookings/${b._id}/edit`} className="inline-block text-center px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-brand/10 text-sky-brand">
                           Edit Existing
@@ -318,10 +343,26 @@ export default function AdminBookingFormPage() {
                 <div>
                   <label className="block text-xs font-semibold text-navy/60 mb-1 flex items-center gap-1.5">
                     <AppIcon name="CurrencyRupeeIcon" size={14} className="text-navy/50" />
+                    Currency
+                  </label>
+                  <select name="currency" value={form.currency} onChange={handleChange} className="w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand">
+                    {RAZORPAY_SUPPORTED_CURRENCIES.map((currency) => (
+                      <option key={currency} value={currency}>{currency}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-navy/60 mb-1 flex items-center gap-1.5">
+                    <AppIcon name="BanknotesIcon" size={14} className="text-navy/50" />
                     Booking Amount
                   </label>
-                  <input name="bookingAmount" type="number" min="0" value={form.bookingAmount} onChange={handleChange} required className="w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand" placeholder="Amount in INR" />
+                  <input name="bookingAmount" type="number" min="0" step="0.01" value={form.bookingAmount} onChange={handleChange} required className="w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand" placeholder={`Amount in ${form.currency}`} />
                 </div>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-sky-brand/15 bg-sky-brand/5 px-4 py-3 text-xs text-navy/70">
+                <p className="font-semibold text-navy">Entered Amount: {formatMoney(form.bookingAmount, form.currency)}</p>
+                <p className="mt-1">If the selected currency is not INR, the current INR to {form.currency} conversion rate will be fetched and stored when you create the booking.</p>
               </div>
 
               <div className="mt-4">

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { formatMoney } from '@/lib/currency';
 
 interface Booking {
   _id: string;
@@ -13,6 +14,7 @@ interface Booking {
   returnDate: string;
   travelers: number;
   totalAmount: number;
+  currency?: string;
   status: string;
   paymentStatus: string;
   createdAt: string;
@@ -163,7 +165,7 @@ export default function AdminBookingsPage() {
                     </p>
                   </div>
                   <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
-                    <p className="text-lg font-bold" style={{ color: '#2A7FD4' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                    <p className="text-lg font-bold" style={{ color: '#2A7FD4' }}>{formatMoney(b.totalAmount, b.currency)}</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       <select
                         value={b.status}

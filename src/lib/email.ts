@@ -149,7 +149,7 @@ export function bookingConfirmationTemplate(data: {
             <tr><td style="padding: 6px 0; color: #8A96A8; font-size: 13px;">Travel Date</td><td style="padding: 6px 0; color: #0F1F3D; font-size: 14px;">${data.travelDate}</td></tr>
             <tr><td style="padding: 6px 0; color: #8A96A8; font-size: 13px;">Return Date</td><td style="padding: 6px 0; color: #0F1F3D; font-size: 14px;">${data.returnDate}</td></tr>
             <tr><td style="padding: 6px 0; color: #8A96A8; font-size: 13px;">Travelers</td><td style="padding: 6px 0; color: #0F1F3D; font-size: 14px;">${data.travelers}</td></tr>
-            <tr><td style="padding: 6px 0; color: #8A96A8; font-size: 13px;">Amount Paid</td><td style="padding: 6px 0; color: #2A7FD4; font-size: 16px; font-weight: 700;">₹${data.amount}</td></tr>
+            <tr><td style="padding: 6px 0; color: #8A96A8; font-size: 13px;">Amount Paid</td><td style="padding: 6px 0; color: #2A7FD4; font-size: 16px; font-weight: 700;">${data.amount}</td></tr>
           </table>
         </div>
         <p style="color: #8A96A8; font-size: 13px; line-height: 1.6;">Our team will reach out with your detailed itinerary within 24 hours.</p>

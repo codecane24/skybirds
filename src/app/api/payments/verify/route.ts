@@ -6,6 +6,7 @@ import Payment from '@/models/Payment';
 import Client from '@/models/Client';
 import { sendEmail, bookingConfirmationTemplate } from '@/lib/email';
 import { format } from 'date-fns';
+import { formatMoney } from '@/lib/currency';
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
               travelDate: format(new Date(booking.travelDate), 'dd MMM yyyy'),
               returnDate: format(new Date(booking.returnDate), 'dd MMM yyyy'),
               travelers: booking.travelers,
-              amount: booking.totalAmount.toLocaleString('en-IN'),
+              amount: formatMoney(booking.totalAmount, booking.currency),
               bookingId: booking._id.toString().slice(-8).toUpperCase(),
             }),
           });

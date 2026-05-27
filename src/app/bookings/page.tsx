@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { formatMoney } from '@/lib/currency';
 
 interface BookingItem {
   _id: string;
@@ -14,6 +15,7 @@ interface BookingItem {
   returnDate: string;
   travelers: number;
   totalAmount: number;
+  currency?: string;
   status: string;
   paymentStatus: string;
   createdAt: string;
@@ -114,7 +116,7 @@ export default function BookingsPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold" style={{ color: '#2A7FD4' }}>₹{booking.totalAmount.toLocaleString('en-IN')}</p>
+                      <p className="text-xl font-bold" style={{ color: '#2A7FD4' }}>{formatMoney(booking.totalAmount, booking.currency)}</p>
                       <p className="text-xs text-navy/30">{format(new Date(booking.createdAt), 'dd MMM yyyy')}</p>
                     </div>
                   </div>

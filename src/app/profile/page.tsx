@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import AppLogo from '@/components/ui/AppLogo';
+import { formatMoney, summarizeAmountsByCurrency } from '@/lib/currency';
 
 interface ClientProfile {
   _id: string;
@@ -26,6 +27,7 @@ interface BookingItem {
   returnDate: string;
   travelers: number;
   totalAmount: number;
+  currency?: string;
   status: string;
   paymentStatus: string;
 }
@@ -87,7 +89,7 @@ export default function ProfilePage() {
   const upcomingBookings = bookings.filter((b) => new Date(b.travelDate) > new Date());
   const totalSpent = bookings
     .filter((b) => b.paymentStatus === 'paid')
-    .reduce((sum, b) => sum + b.totalAmount, 0);
+    .map((b) => ({ amount: b.totalAmount, currency: b.currency }));
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -175,7 +177,7 @@ export default function ProfilePage() {
               { stat: bookings.length.toString(), label: 'Total Trips', color: '#2A7FD4' },
               { stat: upcomingBookings.length.toString(), label: 'Upcoming', color: '#E8A020' },
               {
-                stat: `₹${totalSpent.toLocaleString('en-IN')}`,
+                stat: summarizeAmountsByCurrency(totalSpent),
                 label: 'Total Spent',
                 color: '#0F1F3D',
               },
@@ -260,7 +262,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-navy text-sm">
-                        ₹{booking.totalAmount.toLocaleString('en-IN')}
+                        {formatMoney(booking.totalAmount, booking.currency)}
                       </p>
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusColor(booking.status)}`}

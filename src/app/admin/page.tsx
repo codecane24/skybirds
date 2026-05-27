@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { formatMoney } from '@/lib/currency';
 
 interface DashboardStats {
   totalTestimonials: number;
@@ -14,7 +15,7 @@ interface DashboardStats {
   totalClients: number;
   totalRevenue: number;
   recentContacts: { _id: string; fullName: string; email: string; createdAt: string }[];
-  recentBookings: { _id: string; destination: string; totalAmount: number; status: string; createdAt: string }[];
+  recentBookings: { _id: string; destination: string; totalAmount: number; currency?: string; status: string; createdAt: string }[];
 }
 
 const statCards = [
@@ -50,17 +51,22 @@ export default function AdminDashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {statCards.map((card) => (
-            <div key={card.key} className="bg-white rounded-2xl p-5 shadow-card">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">{card.icon}</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-navy/40">{card.label}</span>
+          {statCards.map((card) => {
+            const rawValue = stats?.[card.key as keyof DashboardStats];
+            const numericValue = typeof rawValue === 'number' ? rawValue : 0;
+
+            return (
+              <div key={card.key} className="bg-white rounded-2xl p-5 shadow-card">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">{card.icon}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-navy/40">{card.label}</span>
+                </div>
+                <p className="text-2xl font-bold text-navy">
+                  {card.isMoney ? `INR ${numericValue.toLocaleString('en-IN')}` : String(numericValue)}
+                </p>
               </div>
-              <p className="text-2xl font-bold text-navy">
-                {card.isMoney ? `₹${(((stats as Record<string, unknown>)?.[card.key] as number) || 0).toLocaleString('en-IN')}` : String((stats as Record<string, unknown>)?.[card.key] ?? 0)}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -79,7 +85,7 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-navy/30">{format(new Date(b.createdAt), 'dd MMM yyyy')}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-sm" style={{ color: '#2A7FD4' }}>₹{b.totalAmount.toLocaleString('en-IN')}</p>
+                      <p className="font-bold text-sm" style={{ color: '#2A7FD4' }}>{formatMoney(b.totalAmount, b.currency)}</p>
                       <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${b.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                         {b.status}
                       </span>

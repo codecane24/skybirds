@@ -28,7 +28,7 @@ export async function saveUploadedImage(file: File, subDir: string): Promise<str
   const publicId = `${subDir}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${baseName}`;
 
   // Upload to Cloudinary
-  const result = await new Promise<any>((resolve, reject) => {
+  const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `skybirds/${subDir}`,
@@ -39,9 +39,10 @@ export async function saveUploadedImage(file: File, subDir: string): Promise<str
           { quality: 'auto' }
         ]
       },
-      (error, result) => {
+      (error: unknown, result?: { secure_url?: string }) => {
         if (error) reject(error);
-        else resolve(result);
+        else if (result?.secure_url) resolve({ secure_url: result.secure_url });
+        else reject(new Error('Cloudinary upload did not return a URL'));
       }
     );
     uploadStream.end(buffer);

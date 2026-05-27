@@ -6,9 +6,10 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { DEFAULT_CURRENCY, formatMoney } from '@/lib/currency';
 
 interface BookingDetail {
-  _id: string; destination: string; travelDate: string; returnDate: string; travelers: number; services: string[]; totalAmount: number;
+  _id: string; destination: string; travelDate: string; returnDate: string; travelers: number; services: string[]; totalAmount: number; currency?: string; conversionRate?: number;
   status: string; paymentStatus: string; razorpayOrderId: string; razorpayPaymentId: string; notes: string; createdAt: string;
   clientId?: { _id: string; name: string; email: string; phone: string; alternatePhone?: string; company: string };
   attachments?: Array<{ type: string; url: string; description?: string; name?: string }>;
@@ -18,6 +19,7 @@ interface PaymentAttempt {
   _id: string;
   amount: number;
   currency: string;
+  conversionRate?: number;
   razorpayOrderId: string;
   razorpayPaymentId: string;
   status: string;
@@ -111,6 +113,9 @@ export default function AdminBookingDetailPage() {
               { label: 'Travel Date', value: format(new Date(booking.travelDate), 'dd MMMM yyyy') },
               { label: 'Return Date', value: format(new Date(booking.returnDate), 'dd MMMM yyyy') },
               { label: 'Travelers', value: String(booking.travelers) },
+              ...(booking.currency && booking.currency !== DEFAULT_CURRENCY
+                ? [{ label: 'INR Conversion Rate', value: booking.conversionRate?.toLocaleString('en-IN', { maximumFractionDigits: 6 }) || 'N/A' }]
+                : []),
               ...(booking.services.length > 0 ? [{ label: 'Services', value: booking.services.join(', ') }] : []),
               ...(booking.notes ? [{ label: 'Notes', value: booking.notes }] : []),
             ].map(r => (
@@ -121,7 +126,7 @@ export default function AdminBookingDetailPage() {
             ))}
             <div className="flex justify-between pt-2">
               <span className="font-bold text-navy">Total Amount</span>
-              <span className="text-2xl font-bold" style={{ color: '#2A7FD4' }}>₹{booking.totalAmount.toLocaleString('en-IN')}</span>
+              <span className="text-2xl font-bold" style={{ color: '#2A7FD4' }}>{formatMoney(booking.totalAmount, booking.currency)}</span>
             </div>
           </div>
         </div>
@@ -206,7 +211,10 @@ export default function AdminBookingDetailPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                     <div><span className="text-navy/40">Date:</span> <span className="font-semibold text-navy ml-2">{format(new Date(attempt.createdAt), 'dd MMM yyyy, hh:mm a')}</span></div>
-                    <div><span className="text-navy/40">Amount:</span> <span className="font-semibold text-navy ml-2">{attempt.currency} {attempt.amount.toLocaleString('en-IN')}</span></div>
+                    <div><span className="text-navy/40">Amount:</span> <span className="font-semibold text-navy ml-2">{formatMoney(attempt.amount, attempt.currency)}</span></div>
+                    {attempt.currency !== DEFAULT_CURRENCY && (
+                      <div><span className="text-navy/40">INR Rate:</span> <span className="font-semibold text-navy ml-2">{attempt.conversionRate?.toLocaleString('en-IN', { maximumFractionDigits: 6 }) || 'N/A'}</span></div>
+                    )}
                     <div><span className="text-navy/40">Order ID:</span> <span className="font-mono text-xs ml-2 text-navy">{attempt.razorpayOrderId || 'N/A'}</span></div>
                     <div><span className="text-navy/40">Payment ID:</span> <span className="font-mono text-xs ml-2 text-navy">{attempt.razorpayPaymentId || 'N/A'}</span></div>
                   </div>

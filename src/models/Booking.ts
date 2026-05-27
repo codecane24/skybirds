@@ -8,6 +8,8 @@ export interface IBooking extends Document {
   travelers: number;
   services: string[];
   totalAmount: number;
+  currency: string;
+  conversionRate: number;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   razorpayOrderId: string;
   razorpayPaymentId: string;
@@ -30,6 +32,8 @@ const BookingSchema = new Schema<IBooking>({
   travelers: { type: Number, required: true, min: 1 },
   services: [{ type: String }],
   totalAmount: { type: Number, required: true },
+  currency: { type: String, default: 'INR', uppercase: true, trim: true },
+  conversionRate: { type: Number, default: 1 },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
   razorpayOrderId: { type: String, default: '' },
   razorpayPaymentId: { type: String, default: '' },

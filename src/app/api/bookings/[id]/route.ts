@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Booking from '@/models/Booking';
 import { auth } from '@/lib/auth';
+import { normalizeCurrency } from '@/lib/currency';
+import { getInrConversionRate } from '@/lib/exchange-rate';
 
 function normalizeBookingStatus<T extends { status?: string; paymentStatus?: string }>(booking: T): T {
   if (booking?.paymentStatus === 'paid' && ['pending', 'cancelled'].includes(booking?.status || '')) {
@@ -33,6 +35,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const data = await req.json();
     await connectDB();
+
+    if (Object.prototype.hasOwnProperty.call(data, 'currency')) {
+      data.currency = normalizeCurrency(data.currency);
+      try {
+        data.conversionRate = await getInrConversionRate(data.currency);
+      } catch (error) {
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : 'Failed to fetch conversion rate' },
+          { status: 502 }
+        );
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'totalAmount')) {
+      data.totalAmount = Number(data.totalAmount);
+      if (!Number.isFinite(data.totalAmount) || data.totalAmount < 0) {
+        return NextResponse.json({ error: 'Booking amount must be a valid number' }, { status: 400 });
+      }
+    }
+
     if (data?.status && ['pending', 'cancelled'].includes(data.status)) {
       const existing = await Booking.findById(id).select('paymentStatus');
       if (existing?.paymentStatus === 'paid') {

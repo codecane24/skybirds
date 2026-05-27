@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/mongodb';
 import Booking from '@/models/Booking';
 import Payment from '@/models/Payment';
+import { normalizeCurrency } from '@/lib/currency';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID!,
@@ -23,9 +24,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
+    const currency = normalizeCurrency(booking.currency);
+
     const order = await razorpay.orders.create({
       amount: Math.round(booking.totalAmount * 100), // paise
-      currency: 'INR',
+      currency,
       receipt: `booking_${booking._id}`,
     });
 
@@ -37,6 +40,8 @@ export async function POST(req: NextRequest) {
     await Payment.create({
       bookingId: booking._id,
       amount: booking.totalAmount,
+      currency,
+      conversionRate: booking.conversionRate || 1,
       razorpayOrderId: order.id,
     });
 

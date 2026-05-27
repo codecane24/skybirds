@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import Client from '@/models/Client';
 import Booking from '@/models/Booking';
 import { auth } from '@/lib/auth';
+import { DEFAULT_CURRENCY, normalizeCurrency } from '@/lib/currency';
+import { getInrConversionRate } from '@/lib/exchange-rate';
 
 export async function GET(req: NextRequest) {
   try {
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const clientIds = clients.map((c: any) => c._id);
     const pendingBookings = await Booking.find({ clientId: { $in: clientIds }, status: 'pending' })
-      .select('_id destination travelers totalAmount status paymentStatus createdAt clientId')
+      .select('_id destination travelers totalAmount currency conversionRate status paymentStatus createdAt clientId')
       .populate('clientId', 'name email phone')
       .sort({ createdAt: -1 })
       .lean();
@@ -62,6 +64,23 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     await connectDB();
 
+    const currency = normalizeCurrency(data.currency || DEFAULT_CURRENCY);
+    const totalAmount = Number(data.bookingAmount);
+
+    if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+      return NextResponse.json({ error: 'Booking amount must be a valid number' }, { status: 400 });
+    }
+
+    let conversionRate = 1;
+    try {
+      conversionRate = await getInrConversionRate(currency);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Failed to fetch conversion rate' },
+        { status: 502 }
+      );
+    }
+
     // Find or create client by email
     let client = await Client.findOne({ email: data.email });
     if (!client) {
@@ -81,7 +100,7 @@ export async function POST(req: NextRequest) {
     }
 
     const existingPending = await Booking.find({ clientId: client._id, status: 'pending' })
-      .select('_id destination totalAmount createdAt')
+      .select('_id destination totalAmount currency conversionRate createdAt')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -103,7 +122,9 @@ export async function POST(req: NextRequest) {
       returnDate: new Date(), // TODO: add returnDate to form
       travelers: data.members,
       services: data.bookingTypes,
-      totalAmount: data.bookingAmount,
+      totalAmount,
+      currency,
+      conversionRate,
       notes: data.description,
       status: 'pending',
       paymentStatus: 'pending',

@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { DEFAULT_CURRENCY, formatMoney } from '@/lib/currency';
 
 interface BookingDetail {
   _id: string;
@@ -15,6 +16,8 @@ interface BookingDetail {
   travelers: number;
   services: string[];
   totalAmount: number;
+  currency?: string;
+  conversionRate?: number;
   status: string;
   paymentStatus: string;
   razorpayPaymentId: string;
@@ -101,6 +104,9 @@ export default function BookingDetailPage() {
                 { label: 'Travel Date', value: format(new Date(booking.travelDate), 'dd MMMM yyyy') },
                 { label: 'Return Date', value: format(new Date(booking.returnDate), 'dd MMMM yyyy') },
                 { label: 'Travelers', value: booking.travelers.toString() },
+                ...(booking.currency && booking.currency !== DEFAULT_CURRENCY
+                  ? [{ label: 'INR Conversion Rate', value: booking.conversionRate?.toLocaleString('en-IN', { maximumFractionDigits: 6 }) || 'N/A' }]
+                  : []),
                 ...(booking.services.length > 0 ? [{ label: 'Services', value: booking.services.join(', ') }] : []),
                 ...(booking.notes ? [{ label: 'Notes', value: booking.notes }] : []),
               ].map((item) => (
@@ -111,7 +117,7 @@ export default function BookingDetailPage() {
               ))}
               <div className="flex justify-between pt-2">
                 <span className="font-bold text-navy">Total Amount</span>
-                <span className="text-2xl font-bold" style={{ color: '#2A7FD4' }}>₹{booking.totalAmount.toLocaleString('en-IN')}</span>
+                <span className="text-2xl font-bold" style={{ color: '#2A7FD4' }}>{formatMoney(booking.totalAmount, booking.currency)}</span>
               </div>
             </div>
           </div>

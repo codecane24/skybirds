@@ -7,11 +7,25 @@ import toast from "react-hot-toast";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/ui/PageHero';
+import { DEFAULT_CURRENCY, formatMoney } from '@/lib/currency';
+
+interface BookingPaymentDetail {
+  _id: string;
+  destination: string;
+  totalAmount: number;
+  currency?: string;
+  conversionRate?: number;
+  paymentStatus: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  clientId?: { email?: string; name?: string };
+  attachments?: Array<{ type?: string; url: string; description?: string }>;
+}
 
 
 export default function PayBookingPage() {
   const { bookingId } = useParams();
-  const [booking, setBooking] = useState(null);
+  const [booking, setBooking] = useState<BookingPaymentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("");
@@ -49,7 +63,7 @@ export default function PayBookingPage() {
           order_id: data.orderId,
           name: "SkyBirds Booking Payment",
           description: `Booking #${bookingId}`,
-          handler: function (response) {
+          handler: function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
             fetch('/api/payments/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -82,7 +96,7 @@ export default function PayBookingPage() {
       };
       document.body.appendChild(script);
     } catch (err) {
-      toast.error(err.message || "Payment failed");
+      toast.error(err instanceof Error ? err.message : "Payment failed");
     } finally {
       setPaying(false);
     }
@@ -116,7 +130,10 @@ export default function PayBookingPage() {
                   <span className="text-navy/60 text-sm">Name: <b>{booking.clientId?.name}</b></span>
                   <span className="text-navy/60 text-sm">Email: <b>{booking.clientId?.email}</b></span>
                   <span className="text-navy/60 text-sm">Destination: <b>{booking.destination}</b></span>
-                  <span className="text-navy/60 text-sm">Amount: <b>₹{booking.totalAmount?.toLocaleString("en-IN")}</b></span>
+                  <span className="text-navy/60 text-sm">Amount: <b>{formatMoney(booking.totalAmount, booking.currency)}</b></span>
+                  {booking.currency && booking.currency !== DEFAULT_CURRENCY && (
+                    <span className="text-navy/60 text-sm">INR Conversion Rate: <b>{booking.conversionRate?.toLocaleString('en-IN', { maximumFractionDigits: 6 }) || 'N/A'}</b></span>
+                  )}
                   <span className="text-navy/60 text-sm">Status: <b className={paymentStatus === 'paid' ? 'text-green-600' : 'text-amber-600'}>{paymentStatus}</b></span>
                 </div>
                 {/* Attachments section */}

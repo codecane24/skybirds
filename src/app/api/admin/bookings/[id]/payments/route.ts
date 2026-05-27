@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     await connectDB();
 
     const attempts = await Payment.find({ bookingId: id })
-      .select('amount currency razorpayOrderId razorpayPaymentId status createdAt')
+      .select('amount currency conversionRate razorpayOrderId razorpayPaymentId status createdAt')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(attempts);

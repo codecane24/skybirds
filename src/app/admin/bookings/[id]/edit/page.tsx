@@ -3,6 +3,33 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { DEFAULT_CURRENCY, formatMoney, RAZORPAY_SUPPORTED_CURRENCIES } from "@/lib/currency";
+
+interface BookingAttachment {
+  type?: string;
+  url?: string;
+  imageUrl?: string;
+  path?: string;
+  name?: string;
+  description?: string;
+}
+
+interface BookingFormState {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone: string;
+  members: number;
+  destination: string;
+  description: string;
+  bookingTypes: string[];
+  uploads: Record<string, File | undefined>;
+  bookingAmount: string;
+  currency: string;
+  conversionRate: number;
+  typeDescriptions: Record<string, string>;
+  attachments: BookingAttachment[];
+}
 
 const bookingTypes = [
   { label: "Ticket", value: "ticket" },
@@ -13,7 +40,7 @@ const bookingTypes = [
 export default function EditBookingPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<BookingFormState>({
     name: "",
     email: "",
     phone: "",
@@ -24,6 +51,8 @@ export default function EditBookingPage() {
     bookingTypes: [],
     uploads: {},
     bookingAmount: "",
+    currency: DEFAULT_CURRENCY,
+    conversionRate: 1,
     typeDescriptions: {},
     attachments: [],
   });
@@ -47,6 +76,8 @@ export default function EditBookingPage() {
           description: data.notes || "",
           bookingTypes: data.services || [],
           bookingAmount: data.totalAmount || "",
+          currency: data.currency || DEFAULT_CURRENCY,
+          conversionRate: data.conversionRate || 1,
           typeDescriptions: data.typeDescriptions || {},
           attachments: data.attachments || [],
         }));
@@ -54,8 +85,10 @@ export default function EditBookingPage() {
       });
   }, [id]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
+    const checked = target.checked;
     if (type === "checkbox") {
       setForm((prev) => {
         const arr = prev.bookingTypes.includes(value)
@@ -66,21 +99,24 @@ export default function EditBookingPage() {
     } else if (type === "file") {
       setForm((prev) => ({
         ...prev,
-        uploads: { ...prev.uploads, [name]: e.target.files[0] },
+        uploads: { ...prev.uploads, [name]: target.files?.[0] },
       }));
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm((prev) => ({
+        ...prev,
+        [name]: name === "members" ? Number(value) : value,
+      }));
     }
   };
 
-  const handleTypeDescription = (type, value) => {
+  const handleTypeDescription = (type: string, value: string) => {
     setForm((prev) => ({
       ...prev,
       typeDescriptions: { ...prev.typeDescriptions, [type]: value },
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
@@ -110,7 +146,7 @@ export default function EditBookingPage() {
       }
 
       const replacedTypes = new Set(newAttachments.map((a) => a.type));
-      const existingAttachments = (form.attachments || []).filter((att) => !replacedTypes.has(att.type));
+      const existingAttachments = (form.attachments || []).filter((att) => !replacedTypes.has(att.type || ''));
       const attachments = [...existingAttachments, ...newAttachments];
 
       const res = await fetch(`/api/bookings/${id}`, {
@@ -121,6 +157,7 @@ export default function EditBookingPage() {
           notes: form.description,
           services: form.bookingTypes,
           totalAmount: Number(form.bookingAmount),
+          currency: form.currency,
           attachments,
         }),
       });
@@ -132,7 +169,7 @@ export default function EditBookingPage() {
         toast.error(data.error || "Failed to update booking");
       }
     } catch (err) {
-      toast.error(err?.message || "Failed to update booking");
+      toast.error(err instanceof Error ? err.message : "Failed to update booking");
     } finally {
       setSubmitting(false);
     }
@@ -217,9 +254,22 @@ export default function EditBookingPage() {
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-[15px] font-semibold mb-2 text-navy">Booking Amount</label>
-            <input name="bookingAmount" type="number" min="0" value={form.bookingAmount} onChange={handleChange} required className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base focus:ring-2 focus:ring-sky-brand outline-none transition" placeholder="Amount (INR)" />
+            <label className="block text-[15px] font-semibold mb-2 text-navy">Currency</label>
+            <select name="currency" value={form.currency} onChange={handleChange} className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base focus:ring-2 focus:ring-sky-brand outline-none transition">
+              {RAZORPAY_SUPPORTED_CURRENCIES.map((currency) => (
+                <option key={currency} value={currency}>{currency}</option>
+              ))}
+            </select>
           </div>
+          <div>
+            <label className="block text-[15px] font-semibold mb-2 text-navy">Booking Amount</label>
+            <input name="bookingAmount" type="number" min="0" step="0.01" value={form.bookingAmount} onChange={handleChange} required className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base focus:ring-2 focus:ring-sky-brand outline-none transition" placeholder={`Amount (${form.currency})`} />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-sky-brand/15 bg-sky-brand/5 px-4 py-3 text-sm text-navy/70">
+          <p className="font-semibold text-navy">Entered Amount: {formatMoney(form.bookingAmount, form.currency)}</p>
+          <p className="mt-1">Saved INR conversion rate: {form.conversionRate.toLocaleString('en-IN', { maximumFractionDigits: 6 })}</p>
+          <p className="mt-1">If you save a non-INR currency, the latest INR to {form.currency} conversion rate will be stored with this booking.</p>
         </div>
         {/* Existing attachments */}
         <div className="mt-6">

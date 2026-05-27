@@ -5,6 +5,7 @@ export interface IPayment extends Document {
   clientId?: Types.ObjectId;
   amount: number;
   currency: string;
+  conversionRate: number;
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
@@ -17,6 +18,7 @@ const PaymentSchema = new Schema<IPayment>({
   clientId: { type: Schema.Types.ObjectId, ref: 'Client', required: false },
   amount: { type: Number, required: true },
   currency: { type: String, default: 'INR' },
+  conversionRate: { type: Number, default: 1 },
   razorpayOrderId: { type: String, required: true },
   razorpayPaymentId: { type: String, default: '' },
   razorpaySignature: { type: String, default: '' },
