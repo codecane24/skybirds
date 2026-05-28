@@ -50,7 +50,7 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full max-w-7xl mx-auto min-h-[88vh] rounded-5xl overflow-hidden group"
+      className="relative w-full max-w-7xl xl:max-w-[96rem] mx-auto min-h-[88vh] rounded-5xl overflow-hidden group"
       style={{ minHeight: "88vh" }}
       aria-label="Sky Birds hero"
     >
@@ -73,17 +73,17 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-r from-navy/50 via-transparent to-transparent" />
 
       {/* Top badge */}
-      <div className="absolute top-10 left-10 z-20" ref={badgeRef}>
-        <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
+      <div className="absolute left-5 top-24 z-20 sm:left-10 sm:top-28" ref={badgeRef}>
+        <div className="glass-card flex items-center gap-2 rounded-full px-3 py-2 sm:px-4">
           <span className="w-2 h-2 rounded-full bg-amber-brand pulse-amber" />
-          <span className="text-navy text-xs font-bold uppercase tracking-widest">
+          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-navy sm:text-xs sm:tracking-widest">
             Corporate Travel Partner
           </span>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 h-full flex flex-col justify-between p-8 md:p-16 pt-32 md:pt-36" style={{ minHeight: "88vh" }}>
+      <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-28 sm:p-8 sm:pt-32 md:p-16 md:pt-36" style={{ minHeight: "88vh" }}>
         <div className="max-w-2xl">
           {slides.length > 0 && (
             <>
@@ -127,7 +127,7 @@ export default function HeroSection() {
         </div>
 
         {/* Bottom row */}
-        <div className="flex flex-col md:flex-row items-end justify-between gap-6 mt-12">
+        <div className="mt-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           {/* Scroll hint */}
           <div className="flex flex-col items-center gap-2">
             <div
@@ -148,7 +148,7 @@ export default function HeroSection() {
           {/* Overlapping stats card */}
           <div
             ref={cardRef}
-            className="bg-white rounded-4xl p-8 max-w-xs w-full shadow-card-lg"
+            className="max-w-xs w-full rounded-4xl bg-white p-6 shadow-card-lg sm:p-8"
           >
             <div className="flex justify-between items-start mb-6">
               <div>

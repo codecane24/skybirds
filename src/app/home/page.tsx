@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="bg-bg space-y-6 px-4 md:px-6 pb-6">
+      <main className="bg-bg space-y-4 px-3 pb-4 sm:px-4 md:space-y-6 md:px-6 md:pb-6">
         <HeroSection />
         <ServicesSection />
         <WhyUsSection />

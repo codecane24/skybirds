@@ -65,12 +65,12 @@ export default function WhyUsSection() {
     <section
       id="why-us"
       ref={sectionRef}
-      className="max-w-7xl mx-auto w-full bg-white rounded-5xl shadow-card px-8 md:px-16 py-16 md:py-20">
-      <div className="grid lg:grid-cols-2 gap-16 md:gap-20 items-center">
+      className="max-w-7xl xl:max-w-[96rem] mx-auto w-full rounded-5xl bg-white px-6 py-16 shadow-card md:px-16 md:py-20">
+      <div className="grid items-center gap-14 md:gap-20 lg:grid-cols-2">
 
         {/* Left â€” Testimonial Carousel in Circle with spinning border */}
-        <div className="relative opacity-100 flex flex-col items-center justify-center min-h-[520px]">
-          <div className="relative flex items-center justify-center w-[420px] h-[420px] max-w-full max-h-full">
+        <div className="relative flex min-h-[360px] w-full flex-col items-center justify-center pb-16 opacity-100 sm:min-h-[520px] sm:pb-20">
+          <div className="relative flex aspect-square w-full max-w-[320px] items-center justify-center sm:max-w-[420px]">
             {/* Spinning dashed ring wraps only the testimonial circle */}
             <div
               className="absolute animate-spin-slow rounded-full border-2 border-dashed pointer-events-none"
@@ -98,9 +98,9 @@ export default function WhyUsSection() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -30 }}
                     transition={{ duration: 0.5 }}
-                    className="flex flex-col items-center justify-center h-full w-full p-8 text-center"
+                    className="flex h-full w-full flex-col items-center justify-center p-6 text-center sm:p-8"
                   >
-                    <p className="font-serif italic text-lg md:text-2xl mb-4 text-navy">"{testimonials[current].quote}"</p>
+                    <p className="mb-4 font-serif text-base italic text-navy sm:text-lg md:text-2xl">"{testimonials[current].quote}"</p>
                     <span className="font-bold text-navy text-base md:text-lg">{testimonials[current].name}</span>
                   </motion.div>
                 </AnimatePresence>
@@ -108,14 +108,14 @@ export default function WhyUsSection() {
             </div>
             {/* Client image - further down right, above ring */}
             {!loading && testimonials.length > 0 && (
-              <div className="absolute z-20" style={{ bottom: '-56px', right: '-56px' }}>
+              <div className="absolute bottom-0 right-2 z-20 translate-y-1/2 sm:-bottom-14 sm:-right-14 sm:translate-y-0">
                 <div className="flex flex-col items-center">
-                  <span className="block rounded-full shadow bg-white p-[8px]">
-                    <img src={testimonials[current].imageUrl} alt={testimonials[current].name} className="w-36 h-36 rounded-full object-cover shadow-xl" />
+                  <span className="block rounded-full bg-white p-[6px] shadow sm:p-[8px]">
+                    <img src={testimonials[current].imageUrl} alt={testimonials[current].name} className="h-24 w-24 rounded-full object-cover shadow-xl sm:h-36 sm:w-36" />
                   </span>
                   <div className="flex gap-0.5 mt-2 justify-center">
                     {[1,2,3,4,5].map((s) => (
-                      <span key={s} className="text-xl" style={{ color: s <= Math.round(testimonials[current].rating) ? '#E8A020' : '#D1D5DB' }}>&#9733;</span>
+                      <span key={s} className="text-base sm:text-xl" style={{ color: s <= Math.round(testimonials[current].rating) ? '#E8A020' : '#D1D5DB' }}>&#9733;</span>
                     ))}
                   </div>
                 </div>

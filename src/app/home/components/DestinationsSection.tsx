@@ -97,7 +97,7 @@ export default function DestinationsSection() {
   const loop = [...destinations, ...destinations];
 
   return (
-    <section id="destinations" className="max-w-7xl mx-auto w-full py-0">
+    <section id="destinations" className="max-w-7xl xl:max-w-[96rem] mx-auto w-full py-0">
 
       {/* Keyframes injected once */}
       <style>{`
@@ -115,7 +115,7 @@ export default function DestinationsSection() {
       `}</style>
 
       {/* Header */}
-      <div className="bg-white rounded-5xl shadow-card px-8 md:px-16 pt-16 pb-10 mb-5">
+      <div className="mb-5 rounded-5xl bg-white px-6 pb-10 pt-16 shadow-card md:px-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
             <span
@@ -128,7 +128,7 @@ export default function DestinationsSection() {
               <span className="font-serif italic font-light" style={{ color: '#E8A020' }}>Takes You.</span>
             </h2>
           </div>
-          <p className="text-sm text-navy/50 max-w-xs uppercase tracking-wider leading-relaxed font-semibold">
+          <p className="max-w-xs text-sm font-semibold uppercase tracking-wider leading-relaxed text-navy/50 md:text-right">
             Our most-booked corporate corridors — each with dedicated support and pre-negotiated rates.
           </p>
         </div>
@@ -142,14 +142,13 @@ export default function DestinationsSection() {
       >
         <div
           ref={trackRef}
-          className={`dest-track flex gap-5${paused ? ' paused' : ''}`}
+          className={`dest-track flex gap-4 sm:gap-5${paused ? ' paused' : ''}`}
           style={{ width: 'max-content' }}
         >
           {loop.map((dest, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-4xl shadow-card group cursor-pointer flex-shrink-0"
-              style={{ width: 280, height: 380 }}
+              className="group relative h-[340px] w-[78vw] max-w-[280px] flex-shrink-0 cursor-pointer overflow-hidden rounded-4xl shadow-card sm:h-[380px]"
               onClick={handleContactClick}
               role="button"
               tabIndex={idx < destinations.length ? 0 : -1}
@@ -161,7 +160,7 @@ export default function DestinationsSection() {
                 alt={dest.alt}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
-                sizes="280px"
+                sizes="(max-width: 640px) 78vw, 280px"
               />
 
               {/* Scrim */}
@@ -174,9 +173,9 @@ export default function DestinationsSection() {
               </div>
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-                <p className={`font-serif italic text-2xl mb-0.5 ${dest.accent}`}>{dest.city}</p>
-                <h3 className="text-lg font-bold text-white">{dest.country}</h3>
+              <div className="absolute bottom-0 left-0 right-0 translate-y-1 p-5 transition-transform duration-300 group-hover:translate-y-0 sm:p-6">
+                <p className={`mb-0.5 font-serif text-xl italic sm:text-2xl ${dest.accent}`}>{dest.city}</p>
+                <h3 className="text-base font-bold text-white sm:text-lg">{dest.country}</h3>
                 <p className="text-xs text-white/70 leading-relaxed mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-h-0 group-hover:max-h-20 overflow-hidden">
                   {dest.tagline}
                 </p>

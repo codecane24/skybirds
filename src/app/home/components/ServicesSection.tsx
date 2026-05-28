@@ -215,7 +215,7 @@ export default function ServicesSection() {
     <section
       id="services"
       ref={sectionRef}
-      className="relative mx-auto w-full max-w-7xl overflow-hidden rounded-5xl bg-white shadow-card"
+      className="relative mx-auto w-full max-w-7xl xl:max-w-[96rem] overflow-hidden rounded-5xl bg-white shadow-card"
     >
       <div className="pointer-events-none absolute inset-0">
         <div

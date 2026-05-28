@@ -71,7 +71,7 @@ export default function OurTeamSection() {
   return (
     <section
       id="our-team"
-      className="max-w-7xl mx-auto w-full rounded-5xl overflow-hidden shadow-card"
+      className="max-w-7xl xl:max-w-[96rem] mx-auto w-full rounded-5xl overflow-hidden shadow-card"
       style={{ backgroundColor: '#0F1F3D' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -99,7 +99,7 @@ export default function OurTeamSection() {
           {slots.map(({ member, idx, isActive }, slotPos) => (
             <div
               key={`slot-${slotPos}`}
-              className="rounded-4xl p-8 flex flex-col gap-6 transition-all duration-500"
+              className={`${isActive ? 'flex' : 'hidden md:flex'} rounded-4xl p-6 md:p-8 flex-col gap-6 transition-all duration-500`}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.05)',
                 border: `1px solid ${isActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'}`,

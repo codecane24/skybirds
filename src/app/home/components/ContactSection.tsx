@@ -118,7 +118,7 @@ export default function ContactSection() {
     <section
       id="contact"
       ref={sectionRef}
-      className="max-w-7xl mx-auto w-full rounded-5xl overflow-hidden shadow-card"
+      className="max-w-7xl xl:max-w-[96rem] mx-auto w-full rounded-5xl overflow-hidden shadow-card"
       style={{ backgroundColor: '#F4F1EC' }}
     >
       <div className="px-8 md:px-16 py-16 md:py-20">
