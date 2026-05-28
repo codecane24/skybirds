@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import AppIcon from "@/components/ui/AppIcon";
 import { DEFAULT_CURRENCY, formatMoney, RAZORPAY_SUPPORTED_CURRENCIES } from "@/lib/currency";
+import { PHONE_COUNTRY_OPTIONS, sanitizePhoneNumber } from "@/lib/phone";
 
 interface BookingAttachment {
   type?: string;
@@ -17,6 +19,7 @@ interface BookingAttachment {
 interface BookingFormState {
   name: string;
   email: string;
+  countryCode: string;
   phone: string;
   alternatePhone: string;
   members: number;
@@ -43,6 +46,7 @@ export default function EditBookingPage() {
   const [form, setForm] = useState<BookingFormState>({
     name: "",
     email: "",
+    countryCode: "+91",
     phone: "",
     alternatePhone: "",
     members: 1,
@@ -69,6 +73,7 @@ export default function EditBookingPage() {
           ...prev,
           name: data.clientId?.name || "",
           email: data.clientId?.email || "",
+          countryCode: data.clientId?.countryCode || "+91",
           phone: data.clientId?.phone || "",
           alternatePhone: data.clientId?.alternatePhone || "",
           members: data.travelers || 1,
@@ -104,7 +109,7 @@ export default function EditBookingPage() {
     } else {
       setForm((prev) => ({
         ...prev,
-        [name]: name === "members" ? Number(value) : value,
+        [name]: name === "members" ? Number(value) : (name === "phone" || name === "alternatePhone" ? sanitizePhoneNumber(value) : value),
       }));
     }
   };
@@ -113,6 +118,13 @@ export default function EditBookingPage() {
     setForm((prev) => ({
       ...prev,
       typeDescriptions: { ...prev.typeDescriptions, [type]: value },
+    }));
+  };
+
+  const handleRemoveAttachment = (indexToRemove: number) => {
+    setForm((prev) => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, index) => index !== indexToRemove),
     }));
   };
 
@@ -153,6 +165,9 @@ export default function EditBookingPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          countryCode: form.countryCode,
+          phone: form.phone,
+          alternatePhone: form.alternatePhone,
           destination: form.destination,
           notes: form.description,
           services: form.bookingTypes,
@@ -178,7 +193,7 @@ export default function EditBookingPage() {
   if (loading) return <div className="py-20 text-center text-navy/40">Loading booking...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-4xl shadow-card-lg p-0 mt-12 mb-16 overflow-hidden border border-navy/10">
+    <div className="max-w-5xl mx-auto bg-white rounded-4xl shadow-card-lg p-0 mt-12 mb-16 overflow-hidden border border-navy/10">
       <div className="bg-gradient-to-r from-sky-brand/10 to-amber-brand/10 px-8 py-7 border-b border-navy/10">
         <h2 className="text-3xl font-bold text-navy tracking-tight mb-1">Edit Booking</h2>
         <p className="text-navy/50 text-base">Update the details for this booking.</p>
@@ -195,11 +210,18 @@ export default function EditBookingPage() {
           </div>
           <div>
             <label className="block text-[15px] font-semibold mb-2 text-navy">Primary Phone</label>
-            <input name="phone" value={form.phone} disabled className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base" />
+            <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
+              <select name="countryCode" value={form.countryCode} onChange={handleChange} className="rounded-xl border border-navy/10 bg-white px-3 py-3 text-base text-navy outline-none transition focus:ring-2 focus:ring-sky-brand">
+                {PHONE_COUNTRY_OPTIONS.map((option) => (
+                  <option key={`${option.code}-${option.label}`} value={option.code}>{option.label}</option>
+                ))}
+              </select>
+              <input name="phone" value={form.phone} onChange={handleChange} inputMode="numeric" className="min-w-[12ch] w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-base tabular-nums text-navy outline-none transition focus:ring-2 focus:ring-sky-brand" placeholder="987654321012" />
+            </div>
           </div>
           <div>
             <label className="block text-[15px] font-semibold mb-2 text-navy">Alternate Number</label>
-            <input name="alternatePhone" value={form.alternatePhone} disabled className="w-full rounded-xl border border-navy/10 bg-bg px-4 py-3 text-navy text-base" />
+            <input name="alternatePhone" value={form.alternatePhone} onChange={handleChange} inputMode="numeric" className="min-w-[12ch] w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-base tabular-nums text-navy outline-none transition focus:ring-2 focus:ring-sky-brand" placeholder="Optional alternate" />
           </div>
           <div>
             <label className="block text-[15px] font-semibold mb-2 text-navy">Members</label>
@@ -275,7 +297,7 @@ export default function EditBookingPage() {
         <div className="mt-6">
           <label className="block text-[15px] font-semibold mb-2 text-navy">Existing Attachments</label>
           {form.attachments && form.attachments.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {form.attachments.map((att, i) => {
                 const attachmentUrl = att.url || att.imageUrl || att.path || "";
                 const lowerUrl = attachmentUrl.toLowerCase();
@@ -290,32 +312,41 @@ export default function EditBookingPage() {
                 }
 
                 return (
-                  <a
-                    key={i}
-                    href={attachmentUrl}
-                    target="_blank"
-                    rel="noopener"
-                    className="block rounded-lg border border-navy/10 hover:border-sky-brand/40 transition overflow-hidden bg-bg"
-                  >
-                    <div className="px-2 py-1.5 border-b border-navy/10 bg-white">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-navy/60">{att.type || 'Document'}</p>
-                    </div>
-                    <div className="h-20 flex items-center justify-center bg-white">
-                      {isImage ? (
-                        <img src={attachmentUrl} alt={att.name || att.type || 'Attachment'} className="max-h-full max-w-full object-cover" />
-                      ) : (
-                        <div className="text-center px-3">
-                          <p className="text-2xl mb-1">📎</p>
-                          <p className="text-xs font-semibold text-navy/70 break-all">{att.name || 'Open document'}</p>
+                  <div key={i} className="relative overflow-hidden rounded-lg border border-navy/10 bg-bg transition hover:border-sky-brand/40">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAttachment(i)}
+                      className="absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-white/95 text-navy shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                      aria-label={`Remove ${att.name || att.type || 'attachment'}`}
+                    >
+                      <AppIcon name="XMarkIcon" size={16} />
+                    </button>
+                    <a
+                      href={attachmentUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="block"
+                    >
+                      <div className="px-2 py-1.5 border-b border-navy/10 bg-white pr-12">
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-navy/60">{att.type || 'Document'}</p>
+                      </div>
+                      <div className="h-24 flex items-center justify-center bg-white">
+                        {isImage ? (
+                          <img src={attachmentUrl} alt={att.name || att.type || 'Attachment'} className="max-h-full max-w-full object-cover" />
+                        ) : (
+                          <div className="text-center px-3">
+                            <AppIcon name="PaperClipIcon" size={24} className="mx-auto mb-1 text-navy/50" />
+                            <p className="text-xs font-semibold text-navy/70 break-all">{att.name || 'Open document'}</p>
+                          </div>
+                        )}
+                      </div>
+                      {att.description && (
+                        <div className="px-2 py-1.5 text-[10px] text-navy/50 border-t border-navy/10 bg-white line-clamp-2">
+                          {att.description}
                         </div>
                       )}
-                    </div>
-                    {att.description && (
-                      <div className="px-2 py-1.5 text-[10px] text-navy/50 border-t border-navy/10 bg-white line-clamp-2">
-                        {att.description}
-                      </div>
-                    )}
-                  </a>
+                    </a>
+                  </div>
                 );
               })}
             </div>

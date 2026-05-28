@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/ui/PageHero';
 import { DEFAULT_CURRENCY, formatMoney } from '@/lib/currency';
+import { formatPhoneNumber } from '@/lib/phone';
 
 interface BookingPaymentDetail {
   _id: string;
@@ -18,7 +19,7 @@ interface BookingPaymentDetail {
   paymentStatus: string;
   razorpayPaymentId?: string;
   razorpayOrderId?: string;
-  clientId?: { email?: string; name?: string };
+  clientId?: { email?: string; name?: string; phone?: string; countryCode?: string };
   attachments?: Array<{ type?: string; url: string; description?: string }>;
 }
 
@@ -129,6 +130,7 @@ export default function PayBookingPage() {
                 <div className="flex flex-col gap-2">
                   <span className="text-navy/60 text-sm">Name: <b>{booking.clientId?.name}</b></span>
                   <span className="text-navy/60 text-sm">Email: <b>{booking.clientId?.email}</b></span>
+                  {booking.clientId?.phone && <span className="text-navy/60 text-sm">Phone: <b>{formatPhoneNumber(booking.clientId.phone, booking.clientId.countryCode)}</b></span>}
                   <span className="text-navy/60 text-sm">Destination: <b>{booking.destination}</b></span>
                   <span className="text-navy/60 text-sm">Amount: <b>{formatMoney(booking.totalAmount, booking.currency)}</b></span>
                   {booking.currency && booking.currency !== DEFAULT_CURRENCY && (

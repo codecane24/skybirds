@@ -5,6 +5,7 @@ export interface IClient extends Document {
   email: string;
   password: string;
   phone: string;
+  countryCode: string;
   alternatePhone: string;
   company: string;
   avatar: string;
@@ -21,6 +22,7 @@ const ClientSchema = new Schema<IClient>({
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
   phone: { type: String, default: '' },
+  countryCode: { type: String, default: '+91' },
   alternatePhone: { type: String, default: '' },
   company: { type: String, default: '' },
   avatar: { type: String, default: '' },

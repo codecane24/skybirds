@@ -8,10 +8,12 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import AppIcon from "@/components/ui/AppIcon";
 import { DEFAULT_CURRENCY, formatMoney, RAZORPAY_SUPPORTED_CURRENCIES } from "@/lib/currency";
+import { formatPhoneNumber, PHONE_COUNTRY_OPTIONS, sanitizePhoneNumber } from "@/lib/phone";
 
 interface BookingFormState {
   name: string;
   email: string;
+  countryCode: string;
   phone: string;
   alternatePhone: string;
   members: number;
@@ -46,7 +48,7 @@ interface PendingBooking {
   status: string;
   paymentStatus: string;
   createdAt: string;
-  clientId?: { name: string; email: string; phone: string; alternatePhone?: string };
+  clientId?: { name: string; email: string; phone: string; countryCode?: string; alternatePhone?: string };
 }
 
 export default function AdminBookingFormPage() {
@@ -54,6 +56,7 @@ export default function AdminBookingFormPage() {
   const [form, setForm] = useState<BookingFormState>({
     name: "",
     email: "",
+    countryCode: "+91",
     phone: "",
     alternatePhone: "",
     members: 1,
@@ -82,7 +85,7 @@ export default function AdminBookingFormPage() {
     const target = e.target as HTMLInputElement;
     const { name, value, type } = target;
     const checked = target.checked;
-    if (name === "email" || name === "phone" || name === "alternatePhone") {
+    if (name === "email" || name === "phone" || name === "alternatePhone" || name === "countryCode") {
       resetDuplicateState();
     }
 
@@ -101,7 +104,7 @@ export default function AdminBookingFormPage() {
     } else {
       setForm((prev) => ({
         ...prev,
-        [name]: name === "members" ? Number(value) : value,
+        [name]: name === "members" ? Number(value) : (name === "phone" || name === "alternatePhone" ? sanitizePhoneNumber(value) : value),
       }));
     }
   };
@@ -117,6 +120,7 @@ export default function AdminBookingFormPage() {
       const query = new URLSearchParams();
       if (form.email.trim()) query.set("email", form.email.trim());
       if (form.phone.trim()) query.set("phone", form.phone.trim());
+      if (form.phone.trim()) query.set("countryCode", form.countryCode);
       if (form.alternatePhone.trim()) query.set("alternatePhone", form.alternatePhone.trim());
 
       const res = await fetch(`/api/admin/bookings?${query.toString()}`);
@@ -194,6 +198,7 @@ export default function AdminBookingFormPage() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
+          countryCode: form.countryCode,
           phone: form.phone,
           alternatePhone: form.alternatePhone,
           members: form.members,
@@ -244,7 +249,7 @@ export default function AdminBookingFormPage() {
                 <AppIcon name="MagnifyingGlassCircleIcon" size={18} className="text-sky-brand" />
                 Step 1: Client Lookup
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-navy/60 mb-1 flex items-center gap-1.5">
                     <AppIcon name="EnvelopeIcon" size={14} className="text-navy/50" />
@@ -252,12 +257,19 @@ export default function AdminBookingFormPage() {
                   </label>
                   <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand" placeholder="client@email.com" />
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-navy/60 mb-1 flex items-center gap-1.5">
                     <AppIcon name="DevicePhoneMobileIcon" size={14} className="text-navy/50" />
                     Mobile Number
                   </label>
-                  <input name="phone" value={form.phone} onChange={handleChange} className="w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand" placeholder="9876543210" />
+                  <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
+                    <select name="countryCode" value={form.countryCode} onChange={handleChange} className="rounded-xl border border-navy/10 bg-white px-3 py-3 text-sm text-navy outline-none focus:ring-2 focus:ring-sky-brand">
+                      {PHONE_COUNTRY_OPTIONS.map((option) => (
+                        <option key={`${option.code}-${option.label}`} value={option.code}>{option.label}</option>
+                      ))}
+                    </select>
+                    <input name="phone" value={form.phone} onChange={handleChange} className="min-w-[12ch] w-full rounded-xl border border-navy/10 bg-white px-4 py-3 text-sm tabular-nums text-navy outline-none focus:ring-2 focus:ring-sky-brand" placeholder="987654321012" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-navy/60 mb-1 flex items-center gap-1.5">
@@ -294,6 +306,7 @@ export default function AdminBookingFormPage() {
                         <div className="text-xs text-navy/70">
                           <p className="font-semibold text-navy">{b.destination} - {format(new Date(b.createdAt), 'dd MMM yyyy, hh:mm a')}</p>
                           <p>Travelers: {b.travelers} | Amount: {formatMoney(b.totalAmount, b.currency)}</p>
+                          {b.clientId?.phone && <p>Phone: {formatPhoneNumber(b.clientId.phone, b.clientId.countryCode)}</p>}
                         </div>
                         <Link href={`/admin/bookings/${b._id}/edit`} className="inline-block text-center px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-brand/10 text-sky-brand">
                           Edit Existing

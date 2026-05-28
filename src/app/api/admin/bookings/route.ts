@@ -5,6 +5,7 @@ import Booking from '@/models/Booking';
 import { auth } from '@/lib/auth';
 import { DEFAULT_CURRENCY, normalizeCurrency } from '@/lib/currency';
 import { getInrConversionRate } from '@/lib/exchange-rate';
+import { normalizeCountryCode, sanitizePhoneNumber } from '@/lib/phone';
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email')?.trim() || '';
-    const phone = searchParams.get('phone')?.trim() || '';
-    const alternatePhone = searchParams.get('alternatePhone')?.trim() || '';
+    const phone = sanitizePhoneNumber(searchParams.get('phone'));
+    const alternatePhone = sanitizePhoneNumber(searchParams.get('alternatePhone'));
+    const countryCode = normalizeCountryCode(searchParams.get('countryCode'));
 
     if (!email && !phone && !alternatePhone) {
       return NextResponse.json({ pendingBookings: [] });
@@ -27,15 +29,17 @@ export async function GET(req: NextRequest) {
     const clientQuery: any[] = [];
     if (email) clientQuery.push({ email });
     if (phone) {
+      clientQuery.push({ phone, countryCode });
       clientQuery.push({ phone });
       clientQuery.push({ alternatePhone: phone });
     }
     if (alternatePhone) {
+      clientQuery.push({ phone: alternatePhone, countryCode });
       clientQuery.push({ phone: alternatePhone });
       clientQuery.push({ alternatePhone });
     }
 
-    const clients = await Client.find({ $or: clientQuery }).select('_id name email phone alternatePhone').lean();
+    const clients = await Client.find({ $or: clientQuery }).select('_id name email phone countryCode alternatePhone').lean();
     if (!clients.length) {
       return NextResponse.json({ pendingBookings: [] });
     }
@@ -43,7 +47,7 @@ export async function GET(req: NextRequest) {
     const clientIds = clients.map((c: any) => c._id);
     const pendingBookings = await Booking.find({ clientId: { $in: clientIds }, status: 'pending' })
       .select('_id destination travelers totalAmount currency conversionRate status paymentStatus createdAt clientId')
-      .populate('clientId', 'name email phone')
+      .populate('clientId', 'name email phone countryCode')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -63,6 +67,10 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json();
     await connectDB();
+
+    const phone = sanitizePhoneNumber(data.phone);
+    const alternatePhone = sanitizePhoneNumber(data.alternatePhone);
+    const countryCode = normalizeCountryCode(data.countryCode);
 
     const currency = normalizeCurrency(data.currency || DEFAULT_CURRENCY);
     const totalAmount = Number(data.bookingAmount);
@@ -87,15 +95,16 @@ export async function POST(req: NextRequest) {
       client = await Client.create({
         name: data.name,
         email: data.email,
-        phone: data.phone,
-        alternatePhone: data.alternatePhone || '',
+        phone,
+        countryCode,
+        alternatePhone,
         password: Math.random().toString(36).slice(-8), // random password
         isVerified: true,
       });
-    } else if (data.phone || data.alternatePhone) {
+    } else if (phone || alternatePhone) {
       await Client.findByIdAndUpdate(client._id, {
-        ...(data.phone ? { phone: data.phone } : {}),
-        ...(typeof data.alternatePhone === 'string' ? { alternatePhone: data.alternatePhone } : {}),
+        ...(phone ? { phone, countryCode } : {}),
+        ...(typeof data.alternatePhone === 'string' ? { alternatePhone } : {}),
       });
     }
 

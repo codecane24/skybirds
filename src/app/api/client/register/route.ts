@@ -4,10 +4,11 @@ import crypto from 'crypto';
 import { connectDB } from '@/lib/mongodb';
 import Client from '@/models/Client';
 import { sendEmail, verificationEmailTemplate } from '@/lib/email';
+import { normalizeCountryCode, sanitizePhoneNumber } from '@/lib/phone';
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, phone, company } = await req.json();
+    const { name, email, password, phone, countryCode, company } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'Name, email and password are required' }, { status: 400 });
@@ -32,7 +33,8 @@ export async function POST(req: NextRequest) {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      phone: phone || '',
+      phone: sanitizePhoneNumber(phone),
+      countryCode: normalizeCountryCode(countryCode),
       company: company || '',
       verificationToken,
       tokenExpiry,

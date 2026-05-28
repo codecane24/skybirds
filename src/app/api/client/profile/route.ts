@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { connectDB } from '@/lib/mongodb';
 import Client from '@/models/Client';
+import { normalizeCountryCode, sanitizePhoneNumber } from '@/lib/phone';
 
 export async function GET() {
   try {
@@ -30,12 +31,18 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, phone, company, avatar } = await req.json();
+    const { name, phone, countryCode, company, avatar } = await req.json();
     await connectDB();
 
     const client = await Client.findByIdAndUpdate(
       session.user.id,
-      { name, phone, company, avatar },
+      {
+        name,
+        phone: sanitizePhoneNumber(phone),
+        countryCode: normalizeCountryCode(countryCode),
+        company,
+        avatar,
+      },
       { new: true }
     ).select('-password -verificationToken -tokenExpiry -resetToken -resetTokenExpiry');
 

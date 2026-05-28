@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import Booking from '@/models/Booking';
 import Payment from '@/models/Payment';
 import { auth } from '@/lib/auth';
+import Client from '@/models/Client';
+import { normalizeCountryCode, sanitizePhoneNumber } from '@/lib/phone';
 
 function normalizeBookingStatus<T extends { status?: string; paymentStatus?: string }>(booking: T): T {
   if (booking?.paymentStatus === 'paid' && ['pending', 'cancelled'].includes(booking?.status || '')) {
@@ -21,7 +23,7 @@ export async function GET() {
     await connectDB();
 
     if (['admin', 'superadmin'].includes(session.user.role)) {
-      const bookings = await Booking.find().populate('clientId', 'name email company phone alternatePhone').sort({ createdAt: -1 }).lean();
+      const bookings = await Booking.find().populate('clientId', 'name email company phone countryCode alternatePhone').sort({ createdAt: -1 }).lean();
 
       const bookingIds = bookings.map((b: any) => b._id);
       const latestAttempts = await Payment.find({ bookingId: { $in: bookingIds } })
@@ -73,6 +75,16 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json();
     await connectDB();
+
+    const phone = sanitizePhoneNumber(data.phone);
+    const countryCode = normalizeCountryCode(data.countryCode);
+
+    if (phone) {
+      await Client.findByIdAndUpdate(session.user.id, {
+        phone,
+        countryCode,
+      });
+    }
 
     const booking = await Booking.create({
       ...data,

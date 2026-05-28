@@ -7,6 +7,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import AppLogo from '@/components/ui/AppLogo';
+import { formatPhoneNumber, PHONE_COUNTRY_OPTIONS, sanitizePhoneNumber } from '@/lib/phone';
 
 interface DestinationOption {
   _id: string;
@@ -20,6 +21,11 @@ interface ServiceOption {
   title: string;
   description: string;
   tag: string;
+}
+
+interface ClientProfile {
+  phone?: string;
+  countryCode?: string;
 }
 
 const basePrices: Record<string, number> = {
@@ -42,6 +48,8 @@ export default function BookPage() {
     travelDate: '',
     returnDate: '',
     travelers: 1,
+    countryCode: '+91',
+    phone: '',
     selectedServices: [] as string[],
     notes: '',
   });
@@ -59,9 +67,19 @@ export default function BookPage() {
     Promise.all([
       fetch('/api/destinations').then((r) => r.json()),
       fetch('/api/services').then((r) => r.json()),
-    ]).then(([d, s]) => {
+      fetch('/api/client/profile').then((r) => r.json()),
+    ]).then(([d, s, profile]) => {
       setDestinations(Array.isArray(d) ? d : []);
       setServices(Array.isArray(s) ? s : []);
+
+      const clientProfile = profile as ClientProfile;
+      if (clientProfile?.phone) {
+        setForm((current) => ({
+          ...current,
+          phone: sanitizePhoneNumber(clientProfile.phone),
+          countryCode: clientProfile.countryCode || current.countryCode,
+        }));
+      }
     });
   }, [status, session, router]);
 
@@ -84,6 +102,11 @@ export default function BookPage() {
       return;
     }
 
+    if (!form.phone.trim()) {
+      toast.error('Please enter your contact number');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/bookings', {
@@ -94,6 +117,8 @@ export default function BookPage() {
           travelDate: form.travelDate,
           returnDate: form.returnDate,
           travelers: form.travelers,
+          phone: form.phone,
+          countryCode: form.countryCode,
           services: form.selectedServices,
           totalAmount,
           notes: form.notes,
@@ -148,7 +173,11 @@ export default function BookPage() {
             toast.error('Payment verification failed');
           }
         },
-        prefill: { name: session?.user?.name, email: session?.user?.email },
+        prefill: {
+          name: session?.user?.name,
+          email: session?.user?.email,
+          contact: formatPhoneNumber(form.phone, form.countryCode),
+        },
         theme: { color: '#0F1F3D' },
       };
 
@@ -469,6 +498,13 @@ export default function BookPage() {
                     className="flex justify-between py-3 border-b"
                     style={{ borderColor: 'rgba(15,31,61,0.06)' }}
                   >
+                    <span className="text-navy/50 text-sm">Contact Number</span>
+                    <span className="font-bold text-navy text-sm">{formatPhoneNumber(form.phone, form.countryCode) || 'Not added'}</span>
+                  </div>
+                  <div
+                    className="flex justify-between py-3 border-b"
+                    style={{ borderColor: 'rgba(15,31,61,0.06)' }}
+                  >
                     <span className="text-navy/50 text-sm">Destination</span>
                     <span className="font-bold text-navy text-sm">{form.destination}</span>
                   </div>
@@ -513,6 +549,39 @@ export default function BookPage() {
                       <span className="text-navy/70 text-sm text-right max-w-xs">{form.notes}</span>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-4xl p-8 shadow-card mb-6">
+                <h3 className="font-bold text-navy mb-5 text-lg">Contact for Updates</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_minmax(0,1fr)] gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50">
+                      Country Code
+                    </label>
+                    <select
+                      value={form.countryCode}
+                      onChange={(e) => setForm({ ...form, countryCode: e.target.value })}
+                      className="form-input"
+                    >
+                      {PHONE_COUNTRY_OPTIONS.map((option) => (
+                        <option key={`${option.code}-${option.label}`} value={option.code}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-navy/50">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: sanitizePhoneNumber(e.target.value) })}
+                      className="form-input"
+                      placeholder="9876543210"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 

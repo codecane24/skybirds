@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { formatMoney } from '@/lib/currency';
+import { formatPhoneNumber } from '@/lib/phone';
 
 interface Booking {
   _id: string;
@@ -18,7 +19,7 @@ interface Booking {
   status: string;
   paymentStatus: string;
   createdAt: string;
-  clientId?: { name: string; email: string; phone?: string; alternatePhone?: string };
+  clientId?: { name: string; email: string; phone?: string; countryCode?: string; alternatePhone?: string };
   lastPaymentAttempt?: {
     status: string;
     createdAt: string;
@@ -153,9 +154,9 @@ export default function AdminBookingsPage() {
                         <p>{b.clientId.name} · {b.clientId.email}</p>
                         {(b.clientId.phone || b.clientId.alternatePhone) && (
                           <p>
-                            {b.clientId.phone ? `Contact: ${b.clientId.phone}` : ''}
+                            {b.clientId.phone ? `Contact: ${formatPhoneNumber(b.clientId.phone, b.clientId.countryCode)}` : ''}
                             {b.clientId.phone && b.clientId.alternatePhone ? ' · ' : ''}
-                            {b.clientId.alternatePhone ? `Alt: ${b.clientId.alternatePhone}` : ''}
+                            {b.clientId.alternatePhone ? `Alt: ${formatPhoneNumber(b.clientId.alternatePhone, b.clientId.countryCode)}` : ''}
                           </p>
                         )}
                       </div>
