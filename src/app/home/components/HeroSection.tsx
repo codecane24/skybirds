@@ -6,7 +6,6 @@ import AppImage from "@/components/ui/AppImage";
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
   const [slides, setSlides] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
   const [isFading, setIsFading] = useState(false);
@@ -71,16 +70,6 @@ export default function HeroSection() {
       {/* Gradient overlay — strong at bottom and left for text legibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-navy/55 via-navy/30 to-navy/75" />
       <div className="absolute inset-0 bg-gradient-to-r from-navy/50 via-transparent to-transparent" />
-
-      {/* Top badge */}
-      <div className="absolute left-5 top-24 z-20 sm:left-10 sm:top-28" ref={badgeRef}>
-        <div className="glass-card flex items-center gap-2 rounded-full px-3 py-2 sm:px-4">
-          <span className="w-2 h-2 rounded-full bg-amber-brand pulse-amber" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-navy sm:text-xs sm:tracking-widest">
-            Corporate Travel Partner
-          </span>
-        </div>
-      </div>
 
       {/* Main content */}
       <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-28 sm:p-8 sm:pt-32 md:p-16 md:pt-36" style={{ minHeight: "88vh" }}>

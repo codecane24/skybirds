@@ -119,10 +119,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <footer className="border-t bg-white/80 px-6 py-4 backdrop-blur-sm" style={{ borderColor: 'rgba(15,31,61,0.08)' }}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-navy/35">© 2026 Sky Birds Admin</p>
-            <div className="inline-flex items-center gap-3 self-start rounded-full border border-navy/10 bg-bg px-4 py-2 shadow-sm">
-              <span className="rounded-full bg-gradient-to-r from-navy to-navy-mid px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-white">Powered By</span>
-              <span className="text-sm font-semibold text-navy/65">Codecane</span>
-            </div>
+            <a
+              href="https://www.techtycoons.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 self-start rounded-full border border-navy/10 bg-bg px-4 py-2 shadow-sm transition hover:border-navy/20 hover:bg-white"
+              aria-label="Powered by Techtycoons"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-navy/45">Powered By</span>
+              <span className="rounded-full bg-gradient-to-r from-navy to-navy-mid px-3 py-1 text-sm font-semibold text-white">Techtycoons</span>
+            </a>
           </div>
         </footer>
       </div>
