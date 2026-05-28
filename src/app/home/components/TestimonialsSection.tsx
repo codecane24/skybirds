@@ -94,7 +94,6 @@ export default function OurTeamSection() {
             Dedicated, experienced, and passionate about business travel.
           </p>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {slots.map(({ member, idx, isActive }, slotPos) => (
             <div
